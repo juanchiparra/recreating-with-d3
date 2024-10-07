@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>template</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="/docs/favicon.ico" type="image/x-icon">
+	<link href="scatter.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<script src="https://d3js.org/d3-voronoi.v1.min.js"></script>
+	</style>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a <br>scatter plot</h1>
+			<span class="date">Octuber 2, 2024</span>
+		</section>
+		<section class="introduction">
+			<p>
+				Placerat commodo aliquam dis nam et tellus. Fringilla primis scelerisque
+				curae tempor, porta lacus interdum arcu. Efficitur platea a consequat at
+				sit maximus, a <a href="https://elpais.com/america/2024-08-04/datos-los-resultados-en-venezuela-segun-la-oposicion-por-estado-parroquia-y-mesa-a-mesa.html#app" target="_blank" class="external";>neque</a>
+			</p>
+			<span>Warning: Efficitur platea a consequat at sit maximus, a neque</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1" class="container">
+				<div id="legend" class="legend">
+					<div class="legend-item">
+						<span class="legend-circle" style="background-color: #035896"></span>
+						<span>Edmundo González</span>
+					</div>
+					<div class="legend-item">
+						<span class="legend-circle" style="background-color: #FF4042;"></span>
+						<span>Nicolás Maduro</span>
+					</div>
+				</div>
+			</div>
+		</section>
+		</div>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				Placerat commodo aliquam dis nam et tellus. Fringilla primis scelerisque
+				curae tempor, porta lacus interdum arcu. Efficitur platea a consequat at
+				sit maximus, a neque
+			</p>
+			<h3>List</h3>
+			<ul>
+				<li>Placerat commodo aliquam dis nam et tellus. Fringilla primis scelerisque
+					curae tempor, porta lacus interdum arcu. Efficitur platea a consequat at
+					sit maximus, a neque</li>
+				<li>Placerat commodo aliquam dis nam et tellus. Fringilla primis scelerisque
+					curae tempor, porta lacus interdum arcu. Efficitur platea a consequat at
+					sit maximus, a neque</li>
+				<li>Placerat commodo aliquam dis nam et tellus. Fringilla primis scelerisque
+					curae tempor, porta lacus interdum arcu. Efficitur platea a consequat at
+					sit maximus, a neque</li>
+			</ul>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data } from './scatter.js';
+
+		// Create chart dimensions
+		const width = 650;
+		const height = 650;
+		const margin = {
+			top: 40,
+			right: 10,
+			bottom: 40,
+			left: 40
+		};
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+		// Draw canvas
+		const wrapper_scatter = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 650 650")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		const bounds_scatter = wrapper_scatter.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		// Draw tooltip
+		const tooltip_scatter = d3.select("#container1")
+			.append("div")
+			.attr("id", "tooltip_scatter")
+			.attr("class", "tooltip")
+			.style("opacity", 0);
+
+		// Create scales
+		const xScale_scatter = d3.scaleLinear()
+			.domain([0, 650])
+			.range([0, innerWidth]);
+
+		const yScale_scatter = d3.scaleLinear()
+			.domain([0, 650])
+			.range([innerHeight, 0]);
+
+		bounds_scatter.append("line")
+			.attr("x1", xScale_scatter(0))
+			.attr("y1", yScale_scatter(0))
+			.attr("x2", xScale_scatter(650))
+			.attr("y2", yScale_scatter(650))
+			.attr("stroke", "black")
+			.attr("stroke-width", 1)
+			.attr("stroke-dasharray", "4 4")
+			.attr("opacity", "0.6");
+
+		// Draw gridlines
+		const xAxisGrid = d3.axisBottom(xScale_scatter)
+			.tickSize(-innerHeight)
+			.tickFormat('')
+			.ticks(10);
+
+		const yAxisGrid = d3.axisLeft(yScale_scatter)
+			.tickSize(-innerWidth)
+			.tickFormat('')
+			.ticks(10);
+
+		bounds_scatter.append('g')
+			.attr('class', 'x grid')
+			.attr('transform', `translate(0,${innerHeight})`)
+			.call(xAxisGrid);
+
+		bounds_scatter.append('g')
+			.attr('class', 'y grid')
+			.call(yAxisGrid);
+
+		// Draw data
+		const voronoi = d3.voronoi()
+			.x(d => xScale_scatter(d.votos_maduro))
+			.y(d => yScale_scatter(d.votos_edmundo))
+			.extent([[0, 0], [width, height]]);
+
+		const voronoiData = voronoi(data).polygons();
+
+		bounds_scatter.append("g")
+			.selectAll("circle")
+			.data(data)
+			.enter()
+			.append("circle")
+			.attr("cy", d => yScale_scatter(d.votos_edmundo))
+			.attr("cx", d => xScale_scatter(d.votos_maduro))
+			.attr("r", 1)
+			.attr("opacity", 0.6)
+			.attr("fill", d => d.votos_edmundo > d.votos_maduro ? "#035896" : "#FF4042");
+
+		bounds_scatter.append("g")
+			.selectAll("path")
+			.data(voronoiData)
+			.enter()
+			.append("path")
+			.attr("d", d => d ? "M" + d.join("L") + "Z" : null)
+			.attr("fill", "none")
+			.attr("pointer-events", "all")
+			.on("mouseover", handleMouseOver)
+			.on("mouseout", handleMouseOut);
+
+		function handleMouseOver(event, d) {
+			const dataPoint = d.data;
+
+			d3.select(event.currentTarget)
+				.transition()
+				.duration(100)
+				.attr("opacity", "1");
+
+			const mainCircle = bounds_scatter.selectAll("circle")
+				.filter(circleData => circleData === dataPoint);
+
+			bounds_scatter.append("circle")
+				.attr("class", "hover-circle")
+				.attr("cx", mainCircle.attr("cx"))
+				.attr("cy", mainCircle.attr("cy"))
+				.attr("r", parseFloat(mainCircle.attr("r")) + 4)
+				.attr("fill", "none")
+				.attr("stroke", "black")
+				.attr("stroke-width", 1);
+
+			tooltip_scatter.transition()
+				.duration(0)
+				.style("opacity", 1);
+
+			tooltip_scatter.html(`<b>${dataPoint.parroquia}</b><br><span>${dataPoint.alcaldia}</span><br><span>Centro ${dataPoint.centro} | Mesa ${dataPoint.mesa}</span><br><br><span style="display:inline-block; width:3px; height:10px; background-color:#035896; margin-right:4px;"></span><span>Edmundo González: ${dataPoint.votos_edmundo} (${dataPoint.porcentaje_edmundo}%)</span><br><span style="display:inline-block; width:3px; height:10px; background-color:#FF4042; margin-right:4px;"></span><span>Nicolas Maduro: ${dataPoint.votos_maduro} (${dataPoint.porcentaje_maduro}%)</span>`)
+				.style("left", (event.pageX + 10) + "px")
+				.style("top", (event.pageY - 15) + "px")
+				.attr("class", "tooltip");
+		}
+
+		function handleMouseOut(event, d) {
+			d3.select(event.currentTarget)
+				.transition()
+				.duration(0)
+				.attr("opacity", "1");
+
+			const hoverCircle = bounds_scatter.select(".hover-circle");
+			if (!hoverCircle.empty()) {
+				hoverCircle.remove();
+			}
+
+			tooltip_scatter.transition()
+				.duration(0)
+				.style("opacity", 0);
+		}
+		// Draw peripherals
+		bounds_scatter.append("g")
+			.attr("class", "axis")
+			.call(d3.axisLeft(yScale_scatter).ticks(10))
+			.append("text")
+			.attr("class", "axis-label")
+			.attr("x", -40)
+			.attr("y", 0)
+			.attr("dy", "-1em")
+			.attr("text-anchor", "start")
+			.text("↑ Votos Edmundo Gónzalez");
+
+		bounds_scatter.append("g")
+			.attr("class", "axis")
+			.attr("transform", `translate(0,${innerHeight})`)
+			.call(d3.axisBottom(xScale_scatter).ticks(10))
+			.append("text")
+			.attr("class", "axis-label")
+			.attr("x", innerWidth)
+			.attr("y", 40)
+			.attr("text-anchor", "end")
+			.text("Votos Nicolás Maduro →");
+	</script>
+</body>
+
+</html>

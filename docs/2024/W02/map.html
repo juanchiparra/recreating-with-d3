@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>template</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="/docs/favicon.ico" type="image/x-icon">
+	<link href="map.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a map</h1>
+			<span class="date">Octuber 2, 2024</span>
+		</section>
+		<section class="introduction">
+			<p>
+				Placerat commodo aliquam dis nam et tellus. Fringilla primis scelerisque
+				curae tempor, porta lacus interdum arcu. Efficitur platea a consequat at
+				sit maximus, a <a href="https://elpais.com/america/2024-08-04/datos-los-resultados-en-venezuela-segun-la-oposicion-por-estado-parroquia-y-mesa-a-mesa.html#datawrapper-vis-6wtCW" target="_blank" class="external";>neque</a>
+			</p>
+			<span>Warning: Efficitur platea a consequat at sit maximus, a neque</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1" class="container">
+			</div>
+			<section class="conclusion">
+				<h3>Highlights</h3>
+				<p>
+					Placerat commodo aliquam dis nam et tellus. Fringilla primis scelerisque
+					curae tempor, porta lacus interdum arcu. Efficitur platea a consequat at
+					sit maximus, a neque
+				</p>
+				<h3>List</h3>
+				<ul>
+					<li>Placerat commodo aliquam dis nam et tellus. Fringilla primis scelerisque
+						curae tempor, porta lacus interdum arcu. Efficitur platea a consequat at
+						sit maximus, a neque</li>
+					<li>Placerat commodo aliquam dis nam et tellus. Fringilla primis scelerisque
+						curae tempor, porta lacus interdum arcu. Efficitur platea a consequat at
+						sit maximus, a neque</li>
+					<li>Placerat commodo aliquam dis nam et tellus. Fringilla primis scelerisque
+						curae tempor, porta lacus interdum arcu. Efficitur platea a consequat at
+						sit maximus, a neque</li>
+				</ul>
+			</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data } from './map.js';
+
+		// Create chart dimensions
+		const width = 650;
+		const height = 650;
+		const margin = {
+			top: 30,
+			right: 10,
+			bottom: 50,
+			left: 30
+		};
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+
+		// Draw canvas
+		const wrapper_map = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 650 650")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		const bounds_map = wrapper_map.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		// Draw tooltip
+		const tooltip_map = d3.select("#container1")
+			.append("div")
+			.attr("id", "tooltip_map")
+			.attr("class", "tooltip")
+			.style("opacity", 0);
+
+		// Create projection
+		const projection = d3.geoMercator()
+			.center([-66.5897, 6.4238])
+			.scale(2500)
+			.translate([width / 2, height / 2]);
+
+		const path = d3.geoPath().projection(projection);
+
+		const colorScale = d3.scaleLinear()
+			.range(["#ff4243", "#fafafa", "#035895"])
+			.domain([-50, 0, 50]);
+
+
+		// Draw data
+		d3.json("venezuela.json").then(geoData => {
+
+			wrapper_map.selectAll("path")
+				.data(geoData.features)
+				.enter().append("path")
+				.attr("d", path)
+				.classed("boundary", true)
+				.attr("fill", d => {
+					const state = data.find(s => s.name === d.properties.name);
+					if (state) {
+						const diff = state.porcentaje_edmundo - state.porcentaje_maduro;
+						return colorScale(diff);
+					}
+					return "#ccc";
+				})
+				.on("mouseover", function (event, d) {
+					const state = data.find(s => s.name === d.properties.name);
+					if (state) {
+						tooltip_map.transition()
+							.duration(100)
+							.style("opacity", 1);
+						tooltip_map.html(`<b class="tooltip-title";>${d.properties.name}</b><br><br><b class="tooltip-properties";>Porcentajes</b><br><span class="tooltip-values">Edmundo: ${state.porcentaje_edmundo}%</span><br><span class="tooltip-values">Maduro: ${state.porcentaje_maduro}%</span><br><br><b class="tooltip-properties">Votos</b><br><span class="tooltip-values">Edmundo: ${state.votos_edmundo}</span><br><span class="tooltip-values">Maduro: ${state.votos_maduro}</span><br><span class="tooltip-values">Válidos: ${state.votos_validos}</span>`)
+							.style("left", (event.pageX + 5) + "px")
+							.style("top", (event.pageY - 28) + "px");
+					}
+				})
+				.on("mousemove", function (event) {
+					tooltip_map.style("left", (event.pageX + 5) + "px")
+						.style("top", (event.pageY - 28) + "px");
+				})
+				.on("mouseout", function () {
+					tooltip_map.transition()
+						.duration(50)
+						.style("opacity", 0);
+				});
+
+			// Add state labels
+			function isOverlapping(d, labels) {
+				const [x, y] = path.centroid(d);
+				return labels.some(label => {
+					const [lx, ly] = label.centroid;
+					return Math.abs(x - lx) < 40 && Math.abs(y - ly) < 40;
+				});
+			}
+
+			d3.json("venezuela.json").then(geoData => {
+				const labels = [];
+
+				wrapper_map.selectAll(".state-label")
+					.data(geoData.features)
+					.enter().append("text")
+					.attr("class", "state-label")
+					.attr("fill", "#fafafa")
+					.attr("transform", d => {
+						const [x, y] = path.centroid(d);
+						if (d.properties.name === "Zulia") {
+							return `translate(${x - 20}, ${y})`;
+						}
+						return `translate(${x}, ${y})`;
+					})
+					.each(function (d) {
+						const state = data.find(s => s.name === d.properties.name);
+						const [x, y] = path.centroid(d);
+						const width = path.bounds(d)[1][0] - path.bounds(d)[0][0];
+						if (width < 30 || isOverlapping(d, labels)) {
+							return;
+						}
+
+						labels.push({ centroid: [x, y], name: d.properties.name });
+
+						const name = d.properties.name;
+						const lines = name.split(" ");
+						const textElement = d3.select(this);
+
+						lines.forEach((line, i) => {
+							textElement.append("tspan")
+								.attr("x", 0)
+								.attr("y", i * 10)
+								.text(line)
+
+						});
+					});
+			});
+
+
+			// Add legend
+			const legendWidth = 135;
+			const legendHeight = 16;
+
+			const legendSvg = wrapper_map.append("g")
+				.attr("class", "legend")
+				.attr("transform", `translate(25, 25)`);
+
+			legendSvg.append("text")
+				.attr("class", "legend-title")
+				.attr("x", legendWidth / 2.8)
+				.attr("y", -8)
+				.attr("text-anchor", "middle")
+				.attr("font-weight", "800")
+				.attr("font-size", "12px")
+				.text("Ganador en voto");
+
+			const defs = legendSvg.append("defs");
+
+			const linearGradient = defs.append("linearGradient")
+				.attr("id", "linear-gradient");
+
+			linearGradient.selectAll("stop")
+				.data(colorScale.ticks().map((t, i, n) => ({
+					offset: `${100 * i / n.length}%`,
+					color: colorScale(t)
+				})))
+				.enter().append("stop")
+				.attr("offset", d => d.offset)
+				.attr("stop-color", d => d.color);
+
+			legendSvg.append("rect")
+				.attr("width", legendWidth)
+				.attr("height", legendHeight)
+				.style("fill", "url(#linear-gradient)")
+				.style("stroke", "none");
+
+			const legendScale = d3.scaleLinear()
+				.domain(colorScale.domain())
+				.range([0, legendWidth]);
+
+			const legendAxis = d3.axisBottom(legendScale)
+				.tickValues([])
+				.tickFormat(d => "");
+
+			legendSvg.append("g")
+				.attr("class", "legend-axis")
+				.attr("transform", `translate(0, ${legendHeight})`)
+				.call(legendAxis);
+
+			// Add text
+			legendSvg.append("text")
+				.attr("x", 0)
+				.attr("y", legendHeight + 14)
+				.attr("text-anchor", "start")
+				.attr("font-size", "11px")
+				.text("+ Maduro");
+
+			legendSvg.append("text")
+				.attr("x", legendWidth)
+				.attr("y", legendHeight + 14)
+				.attr("text-anchor", "end")
+				.attr("font-size", "11px")
+				.text("+ González");
+		});
+	</script>
+</body>
+
+</html>

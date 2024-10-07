@@ -1,0 +1,121 @@
+:root {
+  font-family: 'Inter', 'Avenir', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: #fdfdfd;
+  color: #232323;
+}
+
+main {
+  padding: 20px;
+}
+
+.header,
+.introduction,
+.visualization {
+  width: 100%;
+  max-width: 650px;
+  margin: 30px auto;
+  padding: 0px auto;
+  text-align: center;
+}
+
+h1 {
+  font-size: 3.815rem;
+  margin: 40px;
+  text-transform: uppercase;
+  font-weight: bold;
+  text-align: center;
+}
+
+p {
+  margin-bottom: 30px;
+  font-size: 1.25em;
+  line-height: 1.5em;
+}
+
+.header p {
+  font-size: 1.3em;
+  text-align: center;
+}
+
+.header span {
+  font-size: 1.1em;
+  display: block;
+  text-align: center;
+  font-style: italic;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.links a {
+  margin: 15px 0;
+  font-size: 1.1em;
+  text-decoration: none;
+  color: #161618;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+.type {
+  font-style: italic;
+  font-weight: 600;
+}
+
+/* Media Queries para diseño responsive */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2em;
+  }
+
+  p {
+    font-size: 1em;
+  }
+
+  .header p {
+    font-size: 1.1em;
+  }
+
+  .header span {
+    font-size: 1em;
+  }
+
+  .visualization .links a {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5em;
+  }
+
+  p {
+    font-size: 0.9em;
+  }
+
+  .header p {
+    font-size: 1em;
+  }
+
+  .header span {
+    font-size: 0.9em;
+  }
+
+  .visualization .links a {
+    padding: 8px;
+  }
+}
