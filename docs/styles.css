@@ -38,6 +38,7 @@ p {
   margin-bottom: 30px;
   font-size: 1.25em;
   line-height: 1.5em;
+  text-align: left;
 }
 
 .header p {
