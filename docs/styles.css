@@ -17,7 +17,6 @@ main {
 }
 
 .header,
-.introduction,
 .visualization {
   width: 100%;
   max-width: 650px;
@@ -25,6 +24,15 @@ main {
   padding: 0px auto;
   text-align: center;
 }
+
+.introduction {
+  width: 100%;
+  max-width: 650px;
+  margin: 30px auto;
+  padding: 0px auto;
+  text-align: left;
+}
+
 
 h1 {
   font-size: 3.815rem;
@@ -38,7 +46,6 @@ p {
   margin-bottom: 30px;
   font-size: 1.25em;
   line-height: 1.5em;
-  text-align: left;
 }
 
 .header p {
