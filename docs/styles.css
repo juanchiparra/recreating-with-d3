@@ -69,6 +69,17 @@ p {
   text-decoration: underline;
 }
 
+.external {
+  color: #161618;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 1px;
+}
+
+.external:hover {
+  text-decoration: none;
+}
+
 .type {
   font-style: italic;
   font-weight: 600;
