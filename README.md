@@ -1,8 +1,11 @@
-# recreating-with-d3
+# Recreating with D3
+
+Each week I'll be recreating a data visualization that has caught my attention from a media outlet. Regardless of the way it was visualized or the tools that were used, I'll try to recreate it using D3.js.
+
+It's a personal challenge to keep learning.
 
 
-| Week | Recreate | Code | Source |
+| Week | Source | Code | Visualization |
 | :---: | :--- | :--- | :--- |
-| 1 | Scatter | Here | El País |
-| 2 | Mapa | There | El País |
-| 3 | Divided | N/A | New York Times |
+| W01 | [El País](https://elpais.com/america/2024-08-04/datos-los-resultados-en-venezuela-segun-la-oposicion-por-estado-parroquia-y-mesa-a-mesa.html#app) |  [2024/W01](/docs/2024/W01/scatter.html) | [Scatter plot](https://juanchiparra.github.io/recreating-with-d3/2024/W01/scatter.html) |
+| W02  | [El País](https://elpais.com/america/2024-08-04/datos-los-resultados-en-venezuela-segun-la-oposicion-por-estado-parroquia-y-mesa-a-mesa.html#datawrapper-vis-6wtCW) | [2024/W02](/docs/2024/W02/map.html) | [Map](https://juanchiparra.github.io/recreating-with-d3/2024/W02/map.html) |
