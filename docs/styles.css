@@ -16,10 +16,17 @@ main {
   padding: 20px;
 }
 
-.header,
-.visualization {
+.header {
   width: 100%;
   max-width: 650px;
+  margin: 30px auto;
+  padding: 0px auto;
+  text-align: center;
+}
+
+.visualization {
+  width: 100%;
+  max-width: 750px;
   margin: 30px auto;
   padding: 0px auto;
   text-align: center;
