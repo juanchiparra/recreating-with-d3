@@ -9,3 +9,5 @@ It's a personal challenge to keep learning.
 | :---: | :--- | :--- | :--- |
 | W01 | [El País](https://elpais.com/america/2024-08-04/datos-los-resultados-en-venezuela-segun-la-oposicion-por-estado-parroquia-y-mesa-a-mesa.html#app) |  [2024/W01](/docs/2024/W01/scatter.html) | [Scatter plot](https://juanchiparra.github.io/recreating-with-d3/2024/W01/scatter.html) |
 | W02  | [El País](https://elpais.com/america/2024-08-04/datos-los-resultados-en-venezuela-segun-la-oposicion-por-estado-parroquia-y-mesa-a-mesa.html#datawrapper-vis-6wtCW) | [2024/W02](/docs/2024/W02/map.html) | [Map](https://juanchiparra.github.io/recreating-with-d3/2024/W02/map.html) |
+| W03  | [New York Times](https://www.nytimes.com/interactive/2024/08/23/us/politics/rnc-dnc-words.html#g-comp-box) | [2024/W03](/docs/2024/W03/butterfly.html) | [Butterfly chart](https://juanchiparra.github.io/recreating-with-d3/2024/W03/butterfly.html) |
+
