@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <title>Recreating a butterfly chart</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link href="butterfly.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <main>
+        <section class="header">
+            <a href="../../index.html" class="back">
+                <span>← Back</span>
+            </a>
+            <h1>Recreating a <br>butterfly chart</h1>
+            <span class="date">Octuber 9, 2024</span>
+        </section>
+        <section class="introduction">
+            <p>
+                This week I recreated a butterfly chart from the <a
+                    href="https://www.nytimes.com/interactive/2024/08/23/us/politics/rnc-dnc-words.html#g-comp-box"
+                    class="external" ;>New York Times</a> on the frequency in the use of certain words, and the
+                distribution among each party, at the United States National Conventions. Jonathan Corum participated in
+                its creation.
+            </p>
+            <span>Warning: Data may be inaccurate compared to the source.</span>
+        </section>
+        <section class="visualization">
+            <h2>Recreation</h2>
+            <div class="header-text">
+                <div class="left">D.N.C.<br> speakers</div>
+                <div class="right">R.N.C.<br> speakers</div>
+            </div>
+            <div id="container1" class="container">
+            </div>
+        </section>
+        </div>
+        <section class="conclusion">
+            <h3>Highlights</h3>
+            <p>
+                I had never made a butterfly chart before and decided to go the easy way, one I already knew: two
+                horizontal bar charts, each facing one direction and separated by a space in the middle.
+            </p>
+            <ul>
+                <li>Among so many charts, I spent a few minutes looking for the right name: tornado chart, diverging bar
+                    chart, population pyramid... I found several options before coming up with a butterfly chart.
+                </li>
+                <li>I've rarely had to adjust so much with axes and ticks, as there were two styles to add. I even had
+                    to use D3's selection.filter to remove the firsts ticks.
+                </li>
+                <li>I added a tooltip with a setting that I have rarely been able to use: it will appear to the left or
+                    the right, depending on which side you are on. The few times I have made this adjustment is when the
+                    tooltip is about to reach the SVG limit.
+                </li>
+            </ul>
+        </section>
+    </main>
+    <script type="module">
+        // Access data
+        import { data } from './butterfly.js';
+
+        // Create chart dimensions
+        const width = 700;
+        const height = 500;
+        const margin = {
+            top: 0,
+            right: 10,
+            bottom: 40,
+            left: 10
+        }
+        const middle = 150;
+
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+
+        // Draw canvas
+        const wrapper_butterfly = d3.select("#container1")
+            .append("svg")
+            .attr("viewBox", "0 -40 700 500")
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        const bounds_butterfly = wrapper_butterfly.append("g")
+            .style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+        // Draw tooltip
+        const tooltip_butterfly = d3.select("#container1")
+            .append("div")
+            .attr("id", "tooltip_butterfly")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        // Create scales
+        const y = d3.scaleBand()
+            .domain(data.map(d => d.name))
+            .range([0, innerHeight])
+            .padding(0.1);
+
+        const x1 = d3.scaleLinear()
+            .domain([0, 301])
+            .nice()
+            .range([(innerWidth - middle) / 2, 0]);
+
+        const x2 = d3.scaleLinear()
+            .domain([0, 301])
+            .nice()
+            .range([0, (innerWidth - middle) / 2]);
+
+        // Draw peripherals
+        bounds_butterfly.append("g")
+            .attr("class", "x-axis")
+            .call(d3.axisTop(x1).ticks(3));
+
+        bounds_butterfly.append("g")
+            .attr("class", "x-axis")
+            .attr("transform", `translate(${(innerWidth + middle) / 2},0)`)
+            .call(d3.axisTop(x2).ticks(3));
+
+
+        d3.selectAll(".x-axis").selectAll(".tick")
+            .filter(function (d) { return d === 0; })
+            .select("line")
+            .style("display", "none");
+
+
+        bounds_butterfly.selectAll(".x-axis .domain")
+            .style("display", "none");
+
+        bounds_butterfly.append("g")
+            .attr("class", "c-axis")
+            .attr("transform", `translate(${(innerWidth) / 2 - 8},-3)`)
+            .call(d3.axisRight(y));
+
+        // Draw data
+        bounds_butterfly.selectAll(".bar1")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => x1(d.dnc))
+            .attr("y", d => y(d.name))
+            .attr("width", d => x1(0) - x1(d.dnc))
+            .attr("height", "22")
+            .attr("fill", "#9bb8d7")
+            .on("mouseover", (event, d) => {
+                d3.select(event.currentTarget)
+                    .transition()
+                    .duration(100)
+                    .attr("opacity", "1");
+
+                tooltip_butterfly.transition()
+                    .duration(50)
+                    .style("opacity", 1);
+
+                tooltip_butterfly.html(`<b>${d.name}</b> was mentioned <b>${d.dnc}</b> times`)
+                    .style("left", (event.pageX - tooltip_butterfly.node().offsetWidth - 10) + "px")
+                    .style("top", (event.pageY - 15) + "px");
+            })
+            .on("mouseout", (event, d) => {
+                d3.select(event.currentTarget)
+                    .transition()
+                    .duration(500)
+                    .attr("opacity", "1");
+
+                tooltip_butterfly.transition()
+                    .duration(50)
+                    .style("opacity", 0);
+            });
+
+
+        bounds_butterfly.selectAll(".bar2")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => (innerWidth + middle) / 2)
+            .attr("y", d => y(d.name))
+            .attr("width", d => x2(d.rnc))
+            .attr("height", "22")
+            .attr("fill", "#e5afa5")
+            .on("mouseover", (event, d) => {
+                d3.select(event.currentTarget)
+                    .transition()
+                    .duration(100)
+                    .attr("opacity", "1");
+
+                tooltip_butterfly.transition()
+                    .duration(50)
+                    .style("opacity", 1);
+
+                tooltip_butterfly.html(`<b>${d.name}</b> was mentioned <b>${d.rnc}</b> times`)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 15) + "px")
+            })
+            .on("mouseout", (event, d) => {
+                d3.select(event.currentTarget)
+                    .transition()
+                    .duration(500)
+                    .attr("opacity", "1");
+
+                tooltip_butterfly.transition()
+                    .duration(50)
+                    .style("opacity", 0);
+            });
+
+
+        bounds_butterfly.append("text")
+            .attr("x", innerWidth / 2)
+            .attr("y", -20)
+            .attr("text-anchor", "middle")
+            .style("font-size", "13px")
+            .style("font-family", "Roboto")
+            .style("letter-spacing", "2px")
+            .attr("fill", "#888888")
+            .append("tspan")
+            .attr("x", innerWidth / 2)
+            .attr("dy", "-0.7em")
+            .text("WORD")
+            .append("tspan")
+            .attr("x", innerWidth / 2)
+            .attr("dy", "1.3em")
+            .text("COUNTS");
+
+        // Draw gridlines
+        bounds_butterfly.append("g")
+            .attr("class", "grid")
+            .call(d3.axisTop(x1).ticks(3)
+                .tickSize(-innerHeight)
+                .tickFormat('')
+                .tickValues(x1.ticks(3).slice(1)));
+
+        bounds_butterfly.append("g")
+            .attr("class", "grid")
+            .attr("transform", `translate(${(innerWidth + middle) / 2},0)`)
+            .call(d3.axisTop(x2).ticks(3)
+                .tickSize(-innerHeight)
+                .tickFormat('')
+                .tickValues(x2.ticks(3).slice(1)));
+
+        bounds_butterfly.append("g")
+            .attr("class", "y-axis")
+            .attr("transform", `translate(${(innerWidth) / 2 - 75}, -4)`)
+            .call(d3.axisRight(y).tickSize(0).tickFormat(''))
+            .select(".domain")
+            .style("color", "#555555")
+            .style("display", "block");
+
+        bounds_butterfly.append("g")
+            .attr("class", "y-axis")
+            .attr("transform", `translate(${(innerWidth) / 2 - -75}, -4)`)
+            .call(d3.axisRight(y).tickSize(0).tickFormat(''))
+            .select(".domain")
+            .style("color", "#555555")
+            .style("display", "block");
+
+    </script>
+</body>
+
+</html>
