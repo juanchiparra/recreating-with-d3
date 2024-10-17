@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <title>Recreating a map</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link href="map.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <main>
+        <section class="header">
+            <a href="../../index.html" class="back">
+                <span>← Back</span>
+            </a>
+            <h1>Recreating a map</h1>
+            <span class="date">Octuber 16, 2024</span>
+        </section>
+        <section class="introduction">
+            <p>
+                This week I recreated a map from <a
+                    href="https://projects.fivethirtyeight.com/trump-harris-2024-election-map/" class="external"
+                    ;>FiveThirtyEight</a> on likely scenarios for the U.S. presidential elections. Amina Brown, Katie
+                Marriner, Aaron Bycoffe and G. Elliott Morris participated in
+                its creation.
+            </p>
+            <span>Warning: Data may be inaccurate compared to the source.</span>
+        </section>
+        <section class="visualization">
+            <h2>Recreation</h2>
+            <div id="legend">
+                <div><span class="legend" style="background-color: #5768AC;">Solid Dem</span></div>
+                <div><span class="legend" style="background-color: #9197C8;">Likely Dem</span></div>
+                <div><span class="legend" style="background-color: #AA74C1;">Toss-Up</span></div>
+                <div><span class="legend" style="background-color: #FF998A;">Likely Rep</span></div>
+                <div><span class="legend" style="background-color: #FA5A50;">Solid Rep</span></div>
+            </div>
+            <div id="container1" class="container">
+            </div>
+        </section>
+        </div>
+        <section class="conclusion">
+            <h3>Highlights</h3>
+            <p>
+                This is the second map I've done during the challenge and it has been an amazing experience. To be
+                honest, this recreation is a scaled-down version of the original visualization, which has a lot more
+                interactivity and other amazing elements, don't miss the opportunity to check it out.
+            </p>
+            <ul>
+                <li>In the past, I have made the state labels, but never with just the initials, this makes them much
+                    easier to use. I generated a script to move the state labels that I wanted so that I could get the
+                    ideal location for the label, since the center, on many occasions, will not be the best option.</li>
+                <li>I had never had the opportunity to draw parallel line patterns on top of a state, and it was easier
+                    than I thought. I had always seen it and wondered if it was a specific functionality, but it's one
+                    of the basics of SVG.</li>
+            </ul>
+        </section>
+    </main>
+    <script type="module">
+        // Access data
+        import { data } from './map.js';
+
+        d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/counties-albers-10m.json").then((us) => {
+            // Create chart dimensions
+            const width = 975;
+            const height = 650;
+            const margin = {
+                top: 30,
+                right: 10,
+                bottom: 50,
+                left: 30
+            };
+
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            // Draw canvas
+            const wrapper_map = d3.select("#container1")
+                .append("svg")
+                .attr("viewBox", "0 0 975 650")
+                .attr("preserveAspectRatio", "xMidYMid meet");
+
+            // Create projection
+            const path = d3.geoPath();
+            const namemap = new Map(us.objects.states.geometries.map(d => [d.properties.name, d.id]));
+            const valuemap = new Map(data.map(d => [namemap.get(d.name), d.result]));
+
+            us.objects.states.geometries.forEach(d => {
+                const stateData = data.find(s => s.name === d.properties.name);
+                if (stateData) {
+                    d.properties.initials = stateData.initials;
+                    d.properties.result = stateData.result;
+                }
+            });
+
+            const states = topojson.feature(us, us.objects.states);
+            const statemesh = topojson.mesh(us, us.objects.states, (a, b) => a !== b);
+
+            // Draw tooltip
+            const tooltip_map = d3.select("#container1")
+                .append("div")
+                .attr("id", "tooltip_map")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            // Create scales
+            const color = d3.scaleOrdinal()
+                .domain(["Solid Dem", "Likely Dem", "Toss-Up", "Likely Rep", "Solid Rep"])
+                .range(["#5768AC", "#9197C8", "#AA74C1", "#FF998A", "#FA5A50"])
+                .unknown("#ccc");
+
+            // Define diagonal lines pattern
+            wrapper_map.append("defs")
+                .append("pattern")
+                .attr("id", "diagonalHatch")
+                .attr("patternUnits", "userSpaceOnUse")
+                .attr("width", 12)
+                .attr("height", 12)
+                .append("path")
+                .attr("d", "M-2,2 l8,-8 M0,12 l12,-12 M10,14 l8,-8")
+                .attr("stroke", "white")
+                .attr("stroke-width", 1.6);
+
+            // Draw data
+            wrapper_map.append("g")
+                .selectAll("path")
+                .data(states.features)
+                .join("path")
+                .attr("fill", d => {
+                    const value = valuemap.get(d.id);
+                    return color(value);
+                })
+                .attr("d", path)
+                .on("mouseover", function (event, d) {
+                    const state = data.find(s => s.name === d.properties.name);
+                    if (state) {
+                        tooltip_map.transition()
+                            .duration(100)
+                            .style("opacity", 1);
+                        tooltip_map.html(` <div style="display: flex; justify-content: space-between; font-size: 16px;"> <span><b>${d.properties.name}</b></span> <span style="margin-left: 20px;">${state.rate} EVs</span> </div> <div style="margin-top: 8px; font-size: 16px;"> <span>Starting forecast:</span> </div> <div style="margin-top: 8px;"> <span style="font-size: 16px; padding: 3px 7px; background-color: ${color(state.result)}; color: white; border-radius: 6px;"> ${state.result} </span> </div> `)
+                            .style("left", (event.pageX + 5) + "px")
+                            .style("top", (event.pageY - 28) + "px");
+                    }
+                })
+                .on("mousemove", function (event) {
+                    tooltip_map.style("left", (event.pageX + 5) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function () {
+                    tooltip_map.transition()
+                        .duration(50)
+                        .style("opacity", 0);
+                });
+
+            // Add diagonal lines
+            wrapper_map.append("g")
+                .selectAll("path")
+                .data(states.features)
+                .join("path")
+                .attr("fill", d => d.properties.result === "Toss-Up" ? "url(#diagonalHatch)" : "none")
+                .attr("d", path)
+                .attr("pointer-events", "none");
+
+            // Define custom offsets
+            const customOffsets = {
+                "Florida": [12, -10],
+                "Michigan": [10, 20],
+                "Maryland": [44, 16],
+                "Vermont": [-2, -10],
+                "New Hampshire": [0, 7],
+                "New Jersey": [24, 0],
+                "Delaware": [22, 3],
+                "Massachusetts": [29, -11],
+                "Rhode Island": [12, 13],
+                "Louisiana": [-12, -16],
+                "Hawaii": [-12, 12],
+                "Connecticut": [3, -1]
+            };
+
+            // Define custom text colors
+            const customTextColors = {
+                "Maryland": "black",
+                "New Jersey": "black",
+                "Rhode Island": "black",
+                "Massachusetts": "black",
+                "Delaware": "black",
+                "Hawaii": "black",
+            };
+
+            // Add custom offsets
+            const textGroup = wrapper_map.append("g")
+                .selectAll("g")
+                .data(states.features)
+                .join("g")
+                .attr("transform", d => {
+                    const [cx, cy] = path.centroid(d);
+                    const offset = customOffsets[d.properties.name] || [0, 0];
+                    return `translate(${cx + offset[0]},${cy + offset[1]})`;
+                });
+
+            textGroup.append("rect")
+                .filter(d => d.properties.result === "Toss-Up")
+                .attr("x", -11)
+                .attr("y", -11)
+                .attr("width", 22)
+                .attr("height", 22)
+                .attr("fill", "#AA74C1")
+                .attr("rx", 3)
+                .attr("ry", 3)
+                .attr("pointer-events", "none");
+
+            // Add state labels
+            textGroup.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", ".35em")
+                .text(d => d.properties.initials)
+                .attr("font-size", "16px")
+                .attr("font-weight", "400")
+                .attr("fill", d => customTextColors[d.properties.name] || (d.properties.result === "Toss-Up" ? "white" : "white"))
+                .attr("pointer-events", "none")
+                .attr("font-family", "JetBrains Mono, monospace");
+
+            wrapper_map.append("path")
+                .datum(statemesh)
+                .attr("fill", "none")
+                .attr("stroke", "white")
+                .attr("stroke-linejoin", "round")
+                .attr("d", path);
+        });
+    </script>
+</body>
+
+</html>
