@@ -167,3 +167,82 @@ h3 {
 .right {
     padding-left: 20px;
 }
+
+/* Media queries */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+
+    h2 {
+        font-size: 1.2em;
+    }
+
+    h3 {
+        font-size: 0.9em;
+    }
+
+    p {
+        font-size: 1em;
+    }
+
+    .header span {
+        font-size: 1em;
+    }
+
+    .introduction span {
+        font-size: 1em;
+    }
+
+    .introduction p {
+        font-size: 1em;
+    }
+
+    .conclusion p,
+    .conclusion li {
+        font-size: 0.8em;
+    }
+
+    .back {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5em;
+    }
+
+    h2 {
+        font-size: 1em;
+    }
+
+    h3 {
+        font-size: 0.8em;
+    }
+
+    p {
+        font-size: 0.9em;
+    }
+
+    .header span {
+        font-size: 0.9em;
+    }
+
+    .introduction span {
+        font-size: 0.9em;
+    }
+
+    .introduction p {
+        font-size: 0.9em;
+    }
+
+    .conclusion p,
+    .conclusion li {
+        font-size: 0.7em;
+    }
+
+    .back {
+        font-size: 12px;
+    }
+}
