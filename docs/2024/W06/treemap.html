@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a treemap</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="treemap.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a treemap</h1>
+			<span class="date">Octuber 30, 2024</span>
+		</section>
+		<section class="introduction">
+			<p>
+				This week I recreated a treemap chart from the <a href="https://data.europa.eu/apps/eusanctionstracker/"
+					class="external" ;>European Commission</a> on the scope of the international sanctions imposed by
+				the European Union. I didn't find the name of who participated in its creation, beyond the European
+				Union.
+			</p>
+			<span>Warning: Data may be inaccurate compared to the source.</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1" class="container">
+			</div>
+		</section>
+		</div>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				This is the third treemap I have visualized. It was a lot of fun and challenging to recreate. I fell in
+				love when I first saw it and thought it would be easier, but there were a few challenges that I didn't
+				see at first
+			</p>
+			<ul>
+				<li>
+					I was confused with everything I had to consider and the way to group/ungroup in the
+					treemap: root, node, parent and children. Reviewing the ones I had done before confused me even more
+					and I had to look in the official documentation.
+				</li>
+				<li>
+					It is ridiculous how using the <b>console.log()</b> will help us so many times. When using D3 and
+					manipulating the DOM, there are an endless number of elements that will be created whose
+					priorities/attributes are “unknown”. The <b></b>console.log()</b> will help us to know them better.
+				</li>
+				<li>
+					This is one of the first times that I have positioned the tooltip in this way, I have almost always
+					chosen near the mouse, it is the most “comfortable” position. But this time I did it considering the
+					width and height of each proportion. The <b>console.log()</b> saved me.
+				</li>
+			</ul>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data } from './treemap.js';
+
+		// Create chart dimensions
+		const width = 1092;
+		const height = 420;
+
+		// Draw canvas
+		const wrapper_treemap = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 1092 420")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		const treemap = d3.treemap()
+			.size([width, height])
+			.padding(1);
+
+		const root = d3.hierarchy(data)
+			.sum(d => d.value)
+			.sort((a, b) => b.value - a.value);
+
+		treemap(root);
+
+		const cell = wrapper_treemap
+			.selectAll("g")
+			.data(root.leaves())
+			.join("g")
+			.attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+		// Draw tooltip
+		const tooltip_butterfly = d3.select("#container1")
+			.append("div")
+			.attr("id", "tooltip_butterfly")
+			.attr("class", "tooltip")
+			.style("opacity", 0);
+
+		// Draw data
+		const rect = cell.append("rect")
+			.attr("width", d => d.x1 - d.x0)
+			.attr("height", d => d.y1 - d.y0)
+			.attr("fill", "#fdfdfd")
+			.attr("stroke", "#003399")
+			.attr("stroke-width", 2)
+			.on("mouseover", function (event, d) {
+				d3.select(this).attr("fill", "#003399");
+				d3.select(this.parentNode).selectAll("tspan").attr("fill", "white").attr("font-weight", "700");
+				d3.select(event.currentTarget)
+					.transition()
+					.duration(100)
+					.attr("opacity", "1");
+				tooltip_butterfly.transition()
+					.duration(50)
+					.style("opacity", 1);
+
+				const rect = d3.select(this).node().getBoundingClientRect();
+				const rectWidth = rect.width;
+				const rectHeight = rect.height;
+				const rectX = rect.x + window.scrollX;
+				const rectY = rect.y + window.scrollY;
+
+				const tooltipX = rectX + rectWidth / 2 - tooltip_butterfly.node().offsetWidth / 2;
+				const tooltipY = rectY - tooltip_butterfly.node().offsetHeight - 10;
+
+				if (window.innerWidth <= 768) {
+					tooltip_butterfly.classed('mobile-tooltip', true);
+				} else {
+					tooltip_butterfly.classed('mobile-tooltip', false)
+						.style("left", tooltipX + "px")
+						.style("top", tooltipY + "px");
+				}
+
+				tooltip_butterfly.html(` <div style="margin-bottom: 10px; padding: 0px 8px;"><b>${d.data.name} [${d.data.initials}]</b></div> <table style="border-collapse: collapse; width: 100%;"> <tr style="border-top: 1px solid #fcfcfc;"> <td style="padding: 8px 8px;">% of total:</td> <td style="padding: 8px 8px;">${d.data.percent}</td> </tr> <tr style="border-top: 1px solid rgba(252, 252, 252, 0.4);"> <td style="padding: 8px 8px">Fin. Sanctions:</td> <td style="padding: 8px 8px;">${d.data.sanctions}</td> </tr> <tr style="border-top: 1px solid rgba(252, 252, 252, 0.4);"> <td style="padding: 8px 8px;">Travel Bans:</td> <td style="padding: 8px 8px;">${d.data.travel_bans}</td> </tr> <tr style="border-top: 1px solid rgba(252, 252, 252, 0.4);"> <td style="padding: 8px 8px;">Individuals:</td> <td style="padding: 8px 8px;">${d.data.individuals}</td> </tr> <tr style="border-top: 1px solid rgba(252, 252, 252, 0.4);"> <td style="padding: 8px 8px;">Entities:</td> <td style="padding: 8px 8px;">${d.data.entities}</td> </tr> </table>`)
+					.style("left", tooltipX + "px")
+					.style("top", tooltipY + "px");
+			})
+			.on("mouseout", function (event, d) {
+				d3.select(this).attr("fill", "#fdfdfd");
+				d3.select(this.parentNode).selectAll("tspan").attr("fill", "#003399").attr("font-weight", "400");
+
+				d3.select(event.currentTarget)
+					.transition()
+					.duration(500)
+					.attr("opacity", "1");
+
+				tooltip_butterfly.transition()
+					.duration(50)
+					.style("opacity", 0);
+			});
+
+		// Add labels
+		const minWidth = 70;
+		const minHeight = 80;
+
+		const text = cell.filter(d => (d.x1 - d.x0) > minWidth && (d.y1 - d.y0) > minHeight).append("text")
+			.attr("x", 4)
+			.attr("y", 13);
+
+		text.append("tspan")
+			.attr("x", 4)
+			.attr("y", 16)
+			.attr("fill", "#003399")
+			.style("font-size", "13px")
+			.style("font-weight", "bold")
+			.each(function (d) {
+				d3.select(this).append("tspan")
+					.text(d.data.name)
+					.attr("fill", "#003399");
+
+				d3.select(this).append("tspan")
+					.html(`[${d.data.initials}]`)
+					.attr("dx", "4px")
+					.attr("fill", "#003399");
+			});
+
+		text.append("tspan")
+			.text(d => d.data.value)
+			.style("font-size", "13px")
+			.attr("x", 4)
+			.attr("y", 30)
+			.attr("fill", "#003399");
+
+		text.append("tspan")
+			.text(d => d.data.percent)
+			.style("font-size", "13px")
+			.attr("x", 4)
+			.attr("y", 46)
+			.attr("fill", "#003399");
+	</script>
+</body>
+
+</html>
