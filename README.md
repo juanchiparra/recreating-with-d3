@@ -13,6 +13,3 @@ It's a personal challenge to keep learning.
 | W04  | [FiveThirtyEight](https://projects.fivethirtyeight.com/trump-harris-2024-election-map/) | [2024/W04](/docs/2024/W04/map.html) | [Map](https://juanchiparra.github.io/recreating-with-d3/2024/W04/map.html) |
 | W05  | [New York Times](https://www.nytimes.com/interactive/2024/09/24/opinion/global-poverty-rates.html) | [2024/W05](/docs/2024/W05/stacked-area.html) | [Stacked area chart](https://juanchiparra.github.io/recreating-with-d3/2024/W05/stacked-area.html) |
 | W06  | [European Union](https://data.europa.eu/apps/eusanctionstracker/) | [2024/W06](/docs/2024/W06/treemap.html) | [Treemap](https://juanchiparra.github.io/recreating-with-d3/2024/W06/treemap.html) |
-
-
-The scope of international sanctions imposed by the European Union (Treemap)
