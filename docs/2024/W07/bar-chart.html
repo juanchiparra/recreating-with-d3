@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <title>Recreating a bar chart</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link href="bar-chart.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <main>
+        <section class="header">
+            <a href="../../index.html" class="back">
+                <span>← Back</span>
+            </a>
+            <h1>Recreating a <br>bar chart</h1>
+            <span class="date">November 06, 2024</span>
+        </section>
+        <section class="introduction">
+            <p>
+                This week I recreated a bar chart from <a
+                    href="https://www.eldiario.es/economia/aumentan-hogares-ingreso-minimo-vital-ayuda-cubre-mitad-pobreza-extrema_1_10972664.html"
+                    class="external" ;>El Diario</a> on the increase in financial aid and extreme poverty in Spain. Raúl
+                Sánchez participated in its creation.
+            </p>
+            <span>Warning: Data may be inaccurate compared to the source.</span>
+        </section>
+        <section class="visualization">
+            <h2>Recreation</h2>
+            <div id="legend" class="legend-container">
+                <div class="legend-rect-container">
+                    <svg width="14" height="14">
+                        <defs>
+                            <pattern id="diagonalHatch2" patternUnits="userSpaceOnUse" width="4" height="4">
+                                <path d="M0,0 l4,4 M-2,2 l4,4 M2,-2 l4,4" stroke="#D0021B" stroke-width="1.4"></path>
+                            </pattern>
+                        </defs>
+                        <rect class="legend-rect" width="14" height="14" fill="url(#diagonalHatch2)"></rect>
+                    </svg>
+                </div>
+                <div class="legend-text">% of households with less than 500 euros per month</div>
+            </div>
+            <div id="container1" class="container">
+            </div>
+        </section>
+        </div>
+        <section class="conclusion">
+            <h3>Highlights</h3>
+            <p>
+                The first love of many: the bar chart. It's probably the type of chart I have been able to visualize the
+                most. I'm glad I could add new features for the first time.
+            </p>
+            <ul>
+                <li>I was able to create a pattern with SVG so I could make a part of the bar stand out. Adjusting the
+                    path is a challenge, I couldn't get it to look how I wanted, but I liked the result.
+                </li>
+                <li>I'm not sure if there is a correct way to do it, but I created two bar charts, one with the solid
+                    color and the other with the pattern, this one I put behind and smaller to avoid showing that they
+                    were overlapping. Could I have gotten the bar chart to start where the other one ended? Maybe, but I
+                    don't know, at the moment, if it's possible.
+                </li>
+            </ul>
+        </section>
+    </main>
+    <script type="module">
+        // Access data
+        import { data } from './bar-chart.js';
+
+        // Create chart dimensions
+        const width = 700;
+        const height = 500;
+        const margin = {
+            top: 20,
+            right: 10,
+            bottom: 40,
+            left: 120
+        }
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+
+        // Draw canvas
+        const wrapper_bar = d3.select("#container1")
+            .append("svg")
+            .attr("viewBox", "0 0 700 500")
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        const defs = wrapper_bar.append("defs");
+
+        // Define diagonal pattern
+        defs.append("pattern")
+            .attr("id", "diagonalHatch")
+            .attr("patternUnits", "userSpaceOnUse")
+            .attr("width", 8)
+            .attr("height", 8)
+            .append("path")
+            .attr("d", "M0,0 l8,8 M-4,4 l8,8 M4,-4 l8,8")
+            .attr("stroke", "#D0021B")
+            .attr("stroke-width", 2);
+
+        const bounds_bar = wrapper_bar.append("g")
+            .style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+        // Create scales
+        const y = d3.scaleBand()
+            .domain(data.map(d => d.name))
+            .range([0, innerHeight]);
+
+        const x = d3.scaleLinear()
+            .domain([0, d3.max(data, d => Math.max(d.value, d.value2))])
+            .nice()
+            .range([0, innerWidth]);
+
+        // Draw peripherals
+        bounds_bar.append("g")
+            .attr("class", "x-axis")
+            .attr("transform", `translate(0,0)`)
+            .call(d3.axisTop(x).ticks(8).tickFormat(d => `${d}%`).tickValues(d3.range(0, 9)));
+
+        bounds_bar.selectAll(".x-axis .domain")
+            .style("display", "none");
+
+        // Draw gridlines
+        bounds_bar.append("g")
+            .attr("class", "grid")
+            .call(d3.axisTop(x).ticks(8)
+                .tickSize(-innerHeight)
+                .tickValues(x.ticks(8)).tickValues(d3.range(0, 9)));
+
+        // Draw data
+        bounds_bar.selectAll(".bar-background")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar-background")
+            .attr("x", 0)
+            .attr("y", d => y(d.name) + 0.2)
+            .attr("width", d => x(d.value2))
+            .attr("height", "21.8")
+            .attr("fill", "url(#diagonalHatch)");
+
+        bounds_bar.selectAll(".bar")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", 0)
+            .attr("y", d => y(d.name))
+            .attr("width", d => x(d.value))
+            .attr("height", "22")
+            .attr("fill", "#D0021B")
+
+        // Draw labels
+        bounds_bar.selectAll(".bar-label")
+            .data(data)
+            .enter().append("text")
+            .attr("class", "bar-label")
+            .attr("x", d => x(d.value) - 5)
+            .attr("y", d => y(d.name) + y.bandwidth() / 2 - 1.5)
+            .attr("dy", "0.35em")
+            .attr("text-anchor", "end")
+            .text(d => `${d.value}%`)
+            .attr("fill", "#fff")
+            .style("font-size", "12px");
+
+        bounds_bar.selectAll(".label")
+            .data(data)
+            .enter().append("text")
+            .attr("class", "label")
+            .attr("x", -10)
+            .attr("y", d => y(d.name) + y.bandwidth() / 2)
+            .attr("dy", "0.35em")
+            .attr("text-anchor", "end")
+            .text(d => d.name)
+            .attr("fill", "#000")
+            .style("font-size", "12px");
+    </script>
+</body>
+
+</html>
