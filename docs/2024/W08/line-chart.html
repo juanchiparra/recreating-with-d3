@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a line chart</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="line-chart.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Knowledge:wght@400;600&display=swap');
+	</style>
+</head>
+
+<body>
+
+	<body>
+		<main>
+			<section class="header">
+				<a href="../../index.html" class="back">
+					<span>← Back</span>
+				</a>
+				<h1>Recreating a line chart</h1>
+				<span class="date">November 13, 2024</span>
+			</section>
+			<section class="introduction">
+				<p>
+					This week I recreated a line chart from <a
+						href="https://www.reuters.com/graphics/USA-CONGRESS/PRODUCTIVITY/egpbabmkwvq/#lawsPassed"
+						class="external" ;>Reuters</a> on United States Congress and the passage of laws.
+					Moira Warburton and Ally J. Levine participated in its creation.
+				</p>
+				<span>Warning: Data may be inaccurate compared to the source.</span>
+			</section>
+			<section class="visualization">
+				<h2>Recreation</h2>
+				<div id="container1" class="container">
+				</div>
+			</section>
+			</div>
+			<section class="conclusion">
+				<h3>Highlights</h3>
+				<p>
+					The line chart is one of the charts I have visualized the most, and I love it when I can add an area
+					to it. What I liked most about this recreation was the opportunity to use <b>d3.curve</b>, something
+					I had
+					wanted to do for a long time.
+				</p>
+				<ul>
+					<li>It was fun to experiment with the different types of curves. It can be used with <b>d3.line</b>
+						and
+						<b>d3.area</b>. For the curious, take a look: <a
+							href="https://d3js.org/d3-shape/curve" class="external">d3.curve</a>
+					</li>
+					<li>Having to recreate (or guess) the data, I sometimes struggle to get the appearance to be the
+						same, and in this recreation, the difference between the two x-axes is quite visible.
+					</li>
+					<li>
+						I still find it difficult to adjust the grids. I have noticed that sometimes I recreate
+						visualizations where the grid exceeds a limit that I'm not able to do, I must be doing
+						something wrong
+					</li>
+				</ul>
+			</section>
+		</main>
+		<script type="module">
+			// Access data
+			import { data } from './line-chart.js';
+
+			// Create chart dimensions
+			const width = 660;
+			const height = 455;
+			const margin = {
+				top: 30,
+				right: 30,
+				bottom: 26,
+				left: 44
+			}
+
+			const innerWidth = width - margin.left - margin.right;
+			const innerHeight = height - margin.top - margin.bottom;
+
+			const wrapper_line_chart = d3.select("#container1")
+				.append("svg")
+				.attr("viewBox", "0 0 660 455")
+				.attr("preserveAspectRatio", "xMidYMid meet");
+
+			const bounds_line_chart = wrapper_line_chart.append("g")
+				.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+			// Create scales
+			const x = d3.scaleLinear()
+				.domain([1972, 2020])
+				.range([0, innerWidth]);
+
+			bounds_line_chart.append("g")
+				.attr("transform", `translate(0,${innerHeight})`)
+				.attr("class", "axis-x")
+				.call(d3.axisBottom(x).tickFormat(d3.format("d")).ticks((2020 - 1972) / 5));
+
+			const y = d3.scaleLinear()
+				.domain([0, 700])
+				.range([innerHeight, 0]);
+
+			bounds_line_chart.append("g")
+				.attr("class", "axis-y")
+				.call(d3.axisLeft(y).ticks(5));
+
+			// Draw gridlines
+			const yAxisGrid = d3.axisLeft(y)
+				.tickSize(-innerWidth)
+				.tickFormat('')
+				.ticks(5);
+
+			const grid = bounds_line_chart.append('g')
+				.attr('class', 'grid')
+				.call(yAxisGrid);
+
+			// Draw data
+			const area = d3.area()
+				.x(d => x(d.year))
+				.y0(y(0))
+				.y1(d => y(d.value))
+				.curve(d3.curveStep);
+
+			bounds_line_chart.append("path")
+				.datum(data)
+				.attr("class", "area")
+				.attr("d", area)
+
+			const line = d3.line()
+				.x(d => x(d.year))
+				.y(d => y(d.value))
+				.curve(d3.curveStep);
+
+			bounds_line_chart.append("path")
+				.datum(data)
+				.attr("class", "line")
+				.attr("d", line);
+
+			//Add circles
+			bounds_line_chart.append("circle")
+				.attr("cx", x(data[0].year))
+				.attr("cy", y(data[0].value))
+				.attr("r", 5)
+				.attr("fill", "#009377")
+
+			bounds_line_chart.append("circle")
+				.attr("cx", x(data[data.length - 1].year))
+				.attr("cy", y(data[data.length - 1].value))
+				.attr("r", 5)
+				.attr("fill", "#009377")
+
+			//Add labels
+
+			const legend = [
+				{ x: 1979.8, y: 664, text: "laws passed" }
+			];
+
+			bounds_line_chart.selectAll("foreignObject.legend")
+				.data(legend)
+				.enter()
+				.append("foreignObject")
+				.attr("class", "legend")
+				.attr("x", d => x(d.x) - 100)
+				.attr("y", d => y(d.y) - 30)
+				.attr("width", 72)
+				.attr("height", 30)
+				.style("background-color", "#fdfdfd")
+				.style("color", "#181816")
+				.style("width", d => `${d.width}px`)
+				.style("text-align", "center")
+				.style("font-family", "Knowledge, Source Sans Pro, Arial, sans-serif")
+				.style("font-size", "14px")
+				.html(d => d.text);
+
+			const numbers = [
+				{ x: 1971.2, y: 616, text: "649" },
+				{ x: 2020.7, y: 350, text: "362" },
+			];
+
+			bounds_line_chart.selectAll("foreignObject.number")
+				.data(numbers)
+				.enter()
+				.append("foreignObject")
+				.attr("class", "numbers")
+				.attr("x", d => x(d.x) - 100)
+				.attr("y", d => y(d.y) - 30)
+				.attr("width", 180)
+				.attr("height", 74)
+				.style("color", "#009377")
+				.style("text-align", "center")
+				.style("font-family", "Knowledge, Source Sans Pro, Arial, sans-serif")
+				.style("font-size", "16px")
+				.style("font-weight", "bold")
+				.html(d => d.text);
+
+			const labels = [
+				{ x: 1984, y: 380, width: 200, text: "Congress passed 713 laws under Republican President Reagan between 1987-88, the highest in 40 years" },
+				{ x: 1996, y: 200, width: 170, text: "The U.S. government shut down for 21 days, then the longest shutdown ever" },
+				{ x: 2017, y: 200, width: 130, text: "Republicans control the House, Senate and presidency" }
+			];
+
+			bounds_line_chart.selectAll("foreignObject.label")
+				.data(labels)
+				.enter()
+				.append("foreignObject")
+				.attr("class", "label")
+				.attr("x", d => x(d.x) - 100)
+				.attr("y", d => y(d.y) - 30)
+				.attr("width", 180)
+				.attr("height", 74)
+				.style("background-color", "#b1ddd5")
+				.style("color", "#181816")
+				.style("padding", "5px")
+				.style("border-radius", "5px")
+				.style("width", d => `${d.width}px`)
+				.style("text-align", "left")
+				.style("font-family", "Knowledge, Source Sans Pro, Arial, sans-serif")
+				.style("font-size", "14px")
+				.html(d => d.text);
+
+			const lines = [
+				{ x1: 1986, y1: 715, x2: 1986, y2: 430 },
+				{ x1: 1994, y1: 250, x2: 1994, y2: 329 },
+				{ x1: 2016, y1: 250, x2: 2016, y2: 429 }
+			];
+
+			bounds_line_chart.selectAll("foreignObject.number")
+				.data(lines)
+				.enter()
+				.append("line")
+				.attr("x1", d => x(d.x1))
+				.attr("y1", d => y(d.y1))
+				.attr("x2", d => x(d.x2))
+				.attr("y2", d => y(d.y2))
+				.attr("stroke", "black")
+				.attr("stroke-width", 0.4);
+
+			grid.selectAll("line")
+				.filter((d, i) => i === 0)
+				.classed("first-line", true);
+		</script>
+	</body>
+
+</html>
