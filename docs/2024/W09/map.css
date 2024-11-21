@@ -1,0 +1,385 @@
+:root {
+    font-family: 'Inter', 'Avenir', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    background-color: #fdfdfd;
+    color: #232323;
+}
+
+main {
+    padding: 20px;
+}
+
+.header,
+.introduction,
+.conclusion {
+    width: 100%;
+    max-width: 650px;
+    margin: 30px auto;
+    padding: 0px auto;
+}
+
+.visualization {
+    width: 100%;
+    max-width: 1050px;
+    margin: 30px auto;
+    padding: 0px auto;
+}
+
+
+.visualization svg {
+    width: 100%;
+    height: auto;
+}
+
+.header span {
+    display: block;
+    text-align: center;
+}
+
+.introduction span {
+    font-size: 1.1em;
+    display: block;
+    text-align: center;
+    font-style: italic;
+}
+
+h1 {
+    font-size: 3em;
+    margin-top: 40px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    font-weight: bold;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.4em;
+    margin: 40px;
+    font-weight: bold;
+    text-align: center;
+}
+
+h3 {
+    font-size: 1em;
+}
+
+.introduction p {
+    margin-bottom: 30px;
+    font-size: 1.25em;
+    line-height: 1.5em;
+}
+
+.conclusion p {
+    margin-bottom: 30px;
+    font-size: 0.9em;
+    line-height: 1.5em;
+}
+
+.conclusion li {
+    margin-bottom: 30px;
+    font-size: 0.9em;
+    line-height: 1.5em;
+}
+
+.back {
+    text-decoration: none;
+    font-size: 16px;
+    color: #161618;
+    text-align: center;
+}
+
+.external {
+    color: #161618;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+}
+
+.external:hover {
+    text-decoration: none;
+}
+
+.tooltip {
+    position: absolute;
+    text-align: left;
+    padding: 10px 16px;
+    color: #181818;
+    font-size: 12px;
+    background: #fcfcfc;
+    box-shadow: rgba(0, 0, 0, 0.15) 2px 3px 8px;
+    border: 0px;
+    border-radius: 4px;
+    pointer-events: none;
+    min-width: 280px;
+}
+
+.header-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.header-text div {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.left {
+    padding-right: 20px;
+}
+
+.right {
+    padding-left: 20px;
+}
+
+#legend {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-top: 80px;
+    margin-bottom: 40px;
+}
+
+.legend-bar {
+    display: flex;
+    width: 100%;
+    height: 14px;
+    position: relative;
+}
+
+.legend-segment {
+    height: 100%;
+}
+
+.middle {
+    position: absolute;
+    transform: translateX(-50%);
+    border-left: 1px solid #000;
+    height: 20px;
+    top: -6px;
+    width: px;
+}
+
+.label {
+    position: absolute;
+    top: 20px;
+    font-size: 12px;
+}
+
+.middle-label {
+    transform: translateX(-50%);
+}
+
+.top-label {
+    position: absolute;
+    top: -90px;
+}
+
+.donald-trump-top-label {
+    text-align: right;
+    color: #c93135;
+}
+
+.kamala-harris-top-label {
+    text-align: left;
+    color: #1375b7;
+}
+
+.ev-value {
+    font-size: 53px;
+    font-weight: bold;
+}
+
+.candidate-name {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.number {
+    font-size: 14px;
+}
+
+.text {
+    margin-top: -1px;
+    font-size: 9.8px;
+}
+
+
+.top-middle-label {
+    transform: translateX(-50%);
+}
+
+.state-label {
+    stroke: black;
+    stroke-width: 3px;
+    stroke-opacity: 0.2;
+    paint-order: stroke;
+}
+
+th {
+    font-weight: 400;
+    color: #767676;
+}
+
+.check-circle {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #c93135;
+    color: white;
+    text-align: center;
+    line-height: 16px;
+    font-size: 12px;
+    position: relative;
+    top: -3px;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+
+    h2 {
+        font-size: 1.2em;
+    }
+
+    h3 {
+        font-size: 0.9em;
+    }
+
+    p {
+        font-size: 1em;
+    }
+
+    .header span {
+        font-size: 1em;
+    }
+
+    .introduction span {
+        font-size: 1em;
+    }
+
+    .introduction p {
+        font-size: 1em;
+    }
+
+    .conclusion p,
+    .conclusion li {
+        font-size: 0.8em;
+    }
+
+    .back {
+        font-size: 14px;
+    }
+
+    #legend {
+        gap: 0;
+    }
+
+    .legend {
+        font-size: 10px;
+        padding: 2px 6px;
+        color: white;
+        margin-right: 4px;
+    }
+
+    .top-label {
+        top: -48px;
+    }
+
+    .middle-label {
+        display: none;
+    }
+
+    .ev-value {
+        font-size: 18px;
+    }
+
+    .candidate-name {
+        font-size: 18px;
+    }
+
+    .check-circle {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5em;
+    }
+
+    h2 {
+        font-size: 1em;
+    }
+
+    h3 {
+        font-size: 0.8em;
+    }
+
+    p {
+        font-size: 0.9em;
+    }
+
+    .header span {
+        font-size: 0.9em;
+    }
+
+    .introduction span {
+        font-size: 0.9em;
+    }
+
+    .introduction p {
+        font-size: 0.9em;
+    }
+
+    .conclusion p,
+    .conclusion li {
+        font-size: 0.7em;
+    }
+
+    .back {
+        font-size: 12px;
+    }
+
+    #legend {
+        gap: 0;
+    }
+
+    .legend {
+        font-size: 10px;
+        padding: 2px 6px;
+        color: white;
+        margin-right: 4px;
+    }
+
+    .top-label {
+        top: -48px;
+    }
+
+    .middle-label {
+        display: none;
+    }
+
+    .ev-value {
+        font-size: 18px;
+    }
+
+    .candidate-name {
+        font-size: 18px;
+    }
+
+    .check-circle {
+        display: none;
+    }
+}
