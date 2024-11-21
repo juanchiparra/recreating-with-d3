@@ -15,4 +15,4 @@ It's a personal challenge to keep learning.
 | W06  | [European Union](https://data.europa.eu/apps/eusanctionstracker/) | [2024/W06](/docs/2024/W06/treemap.html) | [Treemap](https://juanchiparra.github.io/recreating-with-d3/2024/W06/treemap.html) |
 | W07  | [El Diario](https://www.eldiario.es/economia/aumentan-hogares-ingreso-minimo-vital-ayuda-cubre-mitad-pobreza-extrema_1_10972664.html) | [2024/W07](/docs/2024/W07/bar-chart.html) | [Bar chart](https://juanchiparra.github.io/recreating-with-d3/2024/W07/bar-chart.html) |
 | W08  | [Reuters](https://www.reuters.com/graphics/USA-CONGRESS/PRODUCTIVITY/egpbabmkwvq/) | [2024/W08](/docs/2024/W08/line-chart.html) | [Line chart](https://juanchiparra.github.io/recreating-with-d3/2024/W08/line-chart.html) |
-
+| W09  | [New York Times](https://www.nytimes.com/interactive/2024/11/05/us/elections/results-president.html) | [2024/W09](/docs/2024/W09/map.html) | [Map](https://juanchiparra.github.io/recreating-with-d3/2024/W09/map.html) |
