@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a dumbbell plot</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="dumbbell.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Knowledge:wght@400;600&display=swap');
+	</style>
+</head>
+
+<body>
+
+	<body>
+		<main>
+			<section class="header">
+				<a href="../../index.html" class="back">
+					<span>← Back</span>
+				</a>
+				<h1>Recreating a dumbbell plot</h1>
+				<span class="date">November 26, 2024</span>
+			</section>
+			<section class="introduction">
+				<p>
+					This week I recreated a dumbbell plot from the <a
+						href="https://www.nytimes.com/interactive/2024/10/30/upshot/voters-moving-polarization.html"
+						class="external" ;>New York Times</a> on interstate moves in the United States and their
+					relationship to election results. Ronda Kaysen and Ethan Singer participated in its creation.
+				</p>
+				<span>Warning: Data may be inaccurate compared to the source.</span>
+			</section>
+			<section class="visualization">
+				<h2>Recreation</h2>
+				<div id="container1" class="container">
+				</div>
+			</section>
+			</div>
+			<section class="conclusion">
+				<h3>Highlights</h3>
+				<p>
+					This is the first time I've done a dumbbell plot with D3. When I was learning D3, a few months ago,
+					I thought there must be a part of the code where you identify what you are going to create,
+					something like “type=dumbbell”. I quickly realized that it's all about lines, circles, and
+					rectangles.
+				</p>
+				<ul>
+					<li>
+						I liked the result. It's funny how I'm more able to come up with solutions, whether it's the
+						best way or whether I've done the same thing as the source, I've come up with a way to do it and
+						visually it's very similar. I think the most important thing is to think creatively.
+					</li>
+					<li>
+						Whenever I can I try to test alternative ways of inserting text, to keep finding solutions and
+						learning. I'm still getting used to the fact that SVG text is very different from HTML text in
+						terms of the use of attributes.
+					</li>
+					<li>
+						In the previous recreations, I have tried to make each one look good on any device, to make it
+						as responsive as possible. What did not happen with this recreation. I usually have a few hours
+						to recreate the visualizations among other priorities I have, and when I don't have time or I
+						have a very complicated week, I let these little details happen.
+					</li>
+				</ul>
+			</section>
+		</main>
+		<script type="module">
+			// Access data
+			import { data } from './dumbbell.js';
+
+			// Create chart dimensions
+			const width = 700;
+			const height = 1200;
+			const margin = {
+				top: 50,
+				right: 30,
+				bottom: 50,
+				left: 100
+			}
+
+			const innerWidth = width - margin.left - margin.right;
+			const innerHeight = height - margin.top - margin.bottom;
+
+			const wrapper_dumbbell_plot = d3.select("#container1")
+				.append("svg")
+				.attr("viewBox", `0 0 ${width} ${height}`)
+				.attr("preserveAspectRatio", "xMidYMid meet");
+
+			const bounds_dumbbell_plot = wrapper_dumbbell_plot.append("g")
+				.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+			// Create scales
+			const xScale = d3.scaleLinear()
+				.domain([-100, 100])
+				.range([0, innerWidth]);
+
+			const yScale = d3.scaleBand()
+				.domain(data.map(d => d.category))
+				.range([0, innerHeight])
+				.paddingInner(0.1)
+				.paddingOuter(0);
+
+			// Add background
+			bounds_dumbbell_plot.append("rect")
+				.attr("x", 0)
+				.attr("y", 0)
+				.attr("width", innerWidth / 2)
+				.attr("height", innerHeight)
+				.attr("fill", "#f5fafc")
+				.attr("opacity", 1);
+
+			bounds_dumbbell_plot.append("rect")
+				.attr("x", innerWidth / 2)
+				.attr("y", 0)
+				.attr("width", innerWidth / 2)
+				.attr("height", innerHeight)
+				.attr("fill", "#fdf7f6")
+				.attr("opacity", 1);
+
+			// Draw gridlines
+			const xAxis = d3.axisBottom(xScale)
+				.ticks(3)
+				.tickSize(-innerHeight)
+				.tickFormat(d => d);
+
+			const yAxis = d3.axisLeft(yScale)
+				.tickSize(-innerWidth)
+				.tickFormat(d => d);
+
+			const LAxis = d3.axisLeft(yScale)
+				.tickSize(54)
+				.tickFormat(d => d);
+
+			bounds_dumbbell_plot.append("g")
+				.attr("class", "x-axis")
+				.attr("transform", `translate(0, ${innerHeight})`)
+				.call(xAxis)
+				.selectAll("text")
+				.remove();
+
+			bounds_dumbbell_plot.append("g")
+				.attr("class", "y-axis")
+				.attr("transform", `translate(0, -11)`)
+				.call(yAxis)
+				.selectAll("text")
+				.remove();
+
+			bounds_dumbbell_plot.append("g")
+				.attr("class", "l-axis")
+				.attr("transform", `translate(1, -11)`)
+				.call(LAxis)
+				.selectAll("text")
+				.remove();
+
+			bounds_dumbbell_plot.selectAll(".l-axis .tick line")
+				.filter((d, i) => i === 0)
+				.remove();
+
+			// Draw data
+			bounds_dumbbell_plot.selectAll(".line")
+				.data(data)
+				.enter()
+				.append("line")
+				.attr("x1", d => xScale(d.value1))
+				.attr("x2", d => xScale(d.value2))
+				.attr("y1", d => yScale(d.category) + yScale.bandwidth() / 2)
+				.attr("y2", d => yScale(d.category) + yScale.bandwidth() / 2)
+				.attr("stroke", d => d.value1 < 0 ? "#cfe3ea" : "#efd0c9")
+				.attr("stroke-width", "2px");
+
+			bounds_dumbbell_plot.selectAll(".circle2")
+				.data(data)
+				.enter()
+				.append("circle")
+				.attr("cx", d => xScale(d.value2))
+				.attr("cy", d => yScale(d.category) + yScale.bandwidth() / 2)
+				.attr("r", 2)
+				.attr("fill", d => d.value2 < 0 ? "#cfe3ea" : "#efd0c9");
+
+			bounds_dumbbell_plot.selectAll(".circle1")
+				.data(data)
+				.enter()
+				.append("circle")
+				.attr("cx", d => xScale(d.value1))
+				.attr("cy", d => yScale(d.category) + yScale.bandwidth() / 2)
+				.attr("r", 3)
+				.attr("fill", d => d.value1 < 0 ? "#3898ca" : "#d66155");
+
+			// Add labels
+			bounds_dumbbell_plot.selectAll(".category-label")
+				.data(data)
+				.enter()
+				.append("text")
+				.attr("x", -50)
+				.attr("y", d => yScale(d.category) + yScale.bandwidth() / 2)
+				.attr("dy", "0.35em")
+				.attr("text-anchor", "end")
+				.text(d => d.category)
+				.attr("font-size", "15px")
+				.attr("text-anchor", "start")
+				.attr("fill", "black");
+
+			bounds_dumbbell_plot.selectAll(".value1-label")
+				.data(data)
+				.enter()
+				.append("text")
+				.attr("x", d => xScale(d.value1) + (d.value1 < 0 ? -10 : 10))
+				.attr("y", d => yScale(d.category) + yScale.bandwidth() / 2)
+				.attr("dy", "0.35em")
+				.attr("text-anchor", d => d.value1 < 0 ? "end" : "start")
+				.attr("dx", d => {
+					if (d.category === "La.") return -45;
+					if (d.category === "Ind.") return -40;
+					return 0;
+				})
+				.text(d => `+${Math.abs(d.value1)} ${d.value1 < 0 ? 'D' : 'R'}`)
+				.attr("font-size", "9.5px")
+				.attr("fill", d => d.value1 < 0 ? "#3898ca" : "#d66155")
+				.attr("font-weight", "500");
+
+			wrapper_dumbbell_plot.append("text")
+				.attr("x", margin.left + innerWidth / 4)
+				.attr("y", margin.top - 10)
+				.attr("text-anchor", "middle")
+				.text("+50D")
+				.attr("font-size", "11px")
+				.attr("fill", "rgba(0, 0, 0, 0.35)")
+				.attr("letter-spacing", "0.075em");
+
+			wrapper_dumbbell_plot.append("text")
+				.attr("x", margin.left + innerWidth / 2)
+				.attr("y", margin.top - 10)
+				.attr("text-anchor", "middle")
+				.text("Tied")
+				.attr("fill", "black")
+				.attr("font-size", "11px")
+				.attr("fill", "rgba(0, 0, 0, 0.35)")
+				.attr("letter-spacing", "0.075em");
+
+			wrapper_dumbbell_plot.append("text")
+				.attr("x", margin.left + 3 * innerWidth / 4)
+				.attr("y", margin.top - 10)
+				.attr("text-anchor", "middle")
+				.text("+50R")
+				.attr("fill", "black")
+				.attr("font-size", "11px")
+				.attr("fill", "rgba(0, 0, 0, 0.35)")
+				.attr("letter-spacing", "0.075em");
+
+			const textLines = [
+				"Voters who moved into the 25",
+				"states Biden won in 2020",
+				"tended to be more Democratic",
+				"than their neighbors"
+			];
+
+			textLines.forEach((line, index) => {
+				wrapper_dumbbell_plot.append("rect")
+					.attr("x", margin.left + 2.14 * innerWidth / 4)
+					.attr("y", 105 + index * 20)
+					.attr("width", 236)
+					.attr("height", 34)
+					.attr("fill", "white");
+
+				const textElement = wrapper_dumbbell_plot.append("text")
+					.attr("x", margin.left + 2.2 * innerWidth / 4)
+					.attr("y", 125 + index * 20)
+					.attr("text-anchor", "start")
+					.attr("font-size", "15px")
+					.attr("fill", "black");
+
+				if (line.includes("more Democratic")) {
+					const parts = line.split("more Democratic");
+					textElement.append("tspan").text(parts[0]);
+					textElement.append("tspan")
+						.text("more Democratic")
+						.attr("font-weight", "bold")
+						.attr("fill", "#3898ca");
+					textElement.append("tspan").text(parts[1]);
+				} else {
+					textElement.text(line);
+				}
+			});
+
+			const textLines2 = [
+				"And likewise, voters who moved",
+				"into the 25 states Trump won",
+				"tended to be more Republican",
+				"than their neighbors"
+			];
+
+			textLines2.forEach((line, index) => {
+				wrapper_dumbbell_plot.append("rect")
+					.attr("x", 124)
+					.attr("y", 970 + index * 20)
+					.attr("width", 240)
+					.attr("height", 34)
+					.attr("fill", "white");
+
+				const textElement = wrapper_dumbbell_plot.append("text")
+					.attr("x", 130)
+					.attr("y", 990 + index * 20)
+					.attr("text-anchor", "start")
+					.attr("font-size", "15px")
+					.attr("fill", "black");
+
+				if (line.includes("more Republican")) {
+					const parts = line.split("more Republican");
+					textElement.append("tspan").text(parts[0]);
+					textElement.append("tspan")
+						.text("more Republican")
+						.attr("font-weight", "bold")
+						.attr("fill", "#d66155");
+					textElement.append("tspan").text(parts[1]);
+				} else {
+					textElement.text(line);
+				}
+			});
+
+			bounds_dumbbell_plot.append("g")
+				.attr("class", "annotation")
+				.attr("transform", "translate(105, -50)")
+				.call(g => {
+					g.append("text")
+						.attr("x", 0)
+						.attr("y", 0)
+						.attr("text-anchor", "end")
+						.style("font-size", "11px")
+						.style("fill", "black")
+						.call(text => {
+							text.append("tspan")
+								.attr("x", 0)
+								.attr("dy", "1.2em")
+								.text("Voters");
+							text.append("tspan")
+								.attr("x", 0)
+								.attr("dy", "1.2em")
+								.text("moving in");
+						});
+
+					g.append("line")
+						.attr("x1", -2.5)
+						.attr("y1", 32)
+						.attr("x2", -2.5)
+						.attr("y2", 52)
+						.style("stroke", "black")
+						.style("stroke-width", "0.6px");
+				});
+
+			bounds_dumbbell_plot.append("g")
+				.attr("class", "annotation")
+				.attr("transform", "translate(181, -50)")
+				.call(g => {
+					g.append("text")
+						.attr("x", 0)
+						.attr("y", 0)
+						.attr("text-anchor", "start")
+						.style("font-size", "11px")
+						.style("fill", "black")
+						.call(text => {
+							text.append("tspan")
+								.attr("x", 0)
+								.attr("dy", "1.2em")
+								.text("2020");
+							text.append("tspan")
+								.attr("x", 0)
+								.attr("dy", "1.2em")
+								.text("result");
+						});
+
+					g.append("line")
+						.attr("x1", 1.5)
+						.attr("y1", 32)
+						.attr("x2", 1.5)
+						.attr("y2", 52)
+						.style("stroke", "black")
+						.style("stroke-width", "0.6px");
+				});
+		</script>
+	</body>
+
+</html>
