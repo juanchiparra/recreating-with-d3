@@ -1,0 +1,196 @@
+:root {
+    font-family: 'Inter', 'Avenir', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    background-color: #fdfdfd;
+    color: #232323;
+}
+
+main {
+    padding: 20px;
+}
+
+.header,
+.introduction,
+.visualization,
+.conclusion {
+    width: 100%;
+    max-width: 650px;
+    margin: 30px auto;
+    padding: 0px auto;
+}
+
+.visualization svg {
+    width: 100%;
+    height: auto;
+}
+
+.header span {
+    display: block;
+    text-align: center;
+}
+
+.introduction span {
+    font-size: 1.1em;
+    display: block;
+    text-align: center;
+    font-style: italic;
+}
+
+h1 {
+    font-size: 3em;
+    margin-top: 40px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    font-weight: bold;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.4em;
+    margin: 40px;
+    font-weight: bold;
+    text-align: center;
+}
+
+h3 {
+    font-size: 1em;
+}
+
+.introduction p {
+    margin-bottom: 30px;
+    font-size: 1.25em;
+    line-height: 1.5em;
+}
+
+.conclusion p {
+    margin-bottom: 30px;
+    font-size: 0.9em;
+    line-height: 1.5em;
+}
+
+.conclusion li {
+    margin-bottom: 30px;
+    font-size: 0.9em;
+    line-height: 1.5em;
+}
+
+.back {
+    text-decoration: none;
+    font-size: 16px;
+    color: #161618;
+    text-align: center;
+}
+
+.external {
+    color: #161618;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+}
+
+.external:hover {
+    text-decoration: none;
+}
+
+.y-axis .domain,
+.x-axis .domain, 
+.l-axis .domain{
+    display: none;
+}
+
+.x-axis .tick line,
+.y-axis .tick line {
+    stroke: #fdfdfd;
+    stroke-width: 2px;
+}
+
+.l-axis .tick line {
+    stroke: #f2f2f2;
+    stroke-width: 2px;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+
+    h2 {
+        font-size: 1.2em;
+    }
+
+    h3 {
+        font-size: 0.9em;
+    }
+
+    p {
+        font-size: 1em;
+    }
+
+    .header span {
+        font-size: 1em;
+    }
+
+    .introduction span {
+        font-size: 1em;
+    }
+
+    .introduction p {
+        font-size: 1em;
+    }
+
+    .conclusion p,
+    .conclusion li {
+        font-size: 0.8em;
+    }
+
+    .back {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5em;
+    }
+
+    h2 {
+        font-size: 1em;
+    }
+
+    h3 {
+        font-size: 0.8em;
+    }
+
+    p {
+        font-size: 0.9em;
+    }
+
+    .header span {
+        font-size: 0.9em;
+    }
+
+    .introduction span {
+        font-size: 0.9em;
+    }
+
+    .introduction p {
+        font-size: 0.9em;
+    }
+
+    .conclusion p,
+    .conclusion li {
+        font-size: 0.7em;
+    }
+
+    .back {
+        font-size: 12px;
+    }
+}
