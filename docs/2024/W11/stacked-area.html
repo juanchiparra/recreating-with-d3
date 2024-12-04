@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a stacked area chart</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="stacked-area.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a stacked area chart</h1>
+			<span class="date">December 4, 2024</span>
+		</section>
+		<section class="introduction">
+			<p>
+				This week I recreated a stacked area chart from <a
+					href="https://www.prinzmagtulis.com/lotto-ph/#g-prizes-Artboard_1-img" class="external" ;>Prinz
+					Magtulis</a> On the increase of jackpot winners in Philippine lotto games.
+				Prinz Magtulis participated in its creation.
+			</p>
+			<span>Warning: Data may be inaccurate compared to the source.</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1" class="container">
+			</div>
+		</section>
+		</div>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				This is the second stacked area chart that I recreated during the challenge. I loved doing it even
+				though it was a bit complicated to replicate the data. I must admit there was some confusion, I don't
+				remember how I got to the <a href="https://www.prinzmagtulis.com" class="external" ;>Prinz Magtulis</a>
+				visualization. From the beginning, I made the decision only to
+				recreate visualizations published in the media. I got distracted and inadvertently selected a
+				visualization from another information designer's project. Prinz is a Graphics reporter for Reuters, I
+				recommend you look at his <a href="https://www.prinzmagtulis.com" class="external" ;>portfolio</a> and
+				see everything he has visualized. He has amazing personal
+				projects.
+			</p>
+			<ul>
+				<li>
+					I'm still looking at the "best way" to include elements/text over the SVG, but I think I've found
+					the way I'm most comfortable with. I feel I have my style more defined. To be honest, sometimes it's
+					weird to me how different it is to use D3 and Svelte, even though this challenge is just D3, I
+					usually use both, or one, in other projects.
+				</li>
+				<li>
+					I'm becoming more and more comfortable with the features of D3. I used to ignore many of the
+					features and overworked myself in trying to figure something out. Since I first used
+					<b>d3.filter(),</b> I
+					haven't stopped taking advantage of it. As in many languages and libraries, reviewing the
+					documentation is a must and D3's documentation is well worth it: <a
+						href="https://d3js.org/getting-started" class="external" ;>https://d3js.org/getting-started</a>
+				</li>
+			</ul>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data } from './stacked-area.js';
+
+		const parseDate = d3.timeParse("%Y-%m-%d");
+		data.forEach(d => {
+			d.date = parseDate(d.date);
+		});
+
+		// Create chart dimensions
+		const width = 800;
+		const height = 550;
+		const margin = {
+			top: 30,
+			right: 30,
+			bottom: 26,
+			left: 44
+		}
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+		const wrapper_stacked_area = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 800 550")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		const bounds_stacked_area = wrapper_stacked_area.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		// Create scales
+		const x = d3.scaleTime()
+			.domain(d3.extent(data, d => d.date))
+			.range([0, innerWidth]);
+
+		const y = d3.scaleLinear()
+			.domain([0, d3.max(data, d => d.A + d.B + d.C + d.D + d.E)])
+			.range([innerHeight, 0]);
+
+		const color = d3.scaleOrdinal()
+			.domain(["A", "B", "C", "D", "E"])
+			.range(["#19526c", "#686198", "#c3619b", "#ff7270", "#ffaf19"]);
+
+		const color2 = d3.scaleOrdinal()
+			.range(["white"]);
+
+		const stack = d3.stack()
+			.keys(["A", "B", "C", "D", "E"]);
+
+		const series = stack(data);
+
+		// Draw gridlines
+		const yAxis = d3.axisLeft(y)
+			.tickSize(-innerWidth)
+			.tickFormat(d => d).ticks(4);
+
+		const yAxisGroup = bounds_stacked_area.append("g")
+			.attr("class", "y-axis")
+			.attr("transform", `translate(0, 0)`)
+			.call(yAxis);
+
+		yAxisGroup.selectAll("text").remove();
+
+		// Draw data
+		const area = d3.area().curve(d3.curveBasis)
+			.x(d => x(d.data.date))
+			.y0(d => y(d[0]))
+			.y1(d => y(d[1]));
+
+		bounds_stacked_area.selectAll(".layer")
+			.data(series)
+			.enter().append("path")
+			.attr("class", "layer")
+			.attr("d", area)
+			.style("opacity", 0.95)
+			.style("fill", d => color(d.key));
+
+		const line = d3.line().curve(d3.curveBasis)
+			.x(d => x(d.data.date))
+			.y(d => y(d[1]));
+
+		bounds_stacked_area.selectAll(".line")
+			.data(series)
+			.enter().append("path")
+			.attr("class", "line")
+			.attr("d", line)
+			.style("fill", "none")
+			.style("stroke", d => color2(d.key))
+			.style("stroke-width", 1);
+
+		// Draw peripherals
+		bounds_stacked_area.append("g")
+			.attr("transform", `translate(0,${innerHeight})`)
+			.attr("class", "x-axis")
+			.call(d3.axisBottom(x).ticks(10).tickSize(10))
+
+		bounds_stacked_area.append("g")
+			.attr("class", "y-axis")
+			.call(d3.axisLeft(y)
+				.ticks(4)
+				.tickSize(10)
+				.tickFormat(d => d === 4 ? 'P4 billion' : d))
+			.selectAll(".tick text")
+			.filter(d => d === 4)
+			.attr("transform", "translate(49, 0)");
+
+		// Add labels
+
+		const textLabels = {
+			"A": {
+				text: "<div><strong>6/42</strong></div>",
+				x: 50,
+				y: 458,
+				color: "white"
+			},
+			"B": {
+				text: "<div><strong>6/45</strong></div>",
+				x: 50,
+				y: 390,
+				color: "white"
+			},
+			"C": {
+				text: "<div><strong>6/49</strong></div>",
+				x: 50,
+				y: 300,
+				color: "white"
+			},
+			"D": {
+				text: "<div><strong>6/55</strong></div>",
+				x: 50,
+				y: 200,
+				color: "white"
+			},
+			"E": {
+				text: "<div><strong>6/58</strong></div>",
+				x: 422,
+				y: 130,
+				color: "black"
+			}
+		};
+
+		bounds_stacked_area.selectAll(".foreignObject")
+			.data(series)
+			.enter().append("foreignObject")
+			.attr("class", "foreignObject")
+			.attr("x", d => textLabels[d.key].x)
+			.attr("y", d => textLabels[d.key].y)
+			.attr("width", 60)
+			.attr("height", 60)
+			.html(d => `<div class="text" style="font-size: 14px; color: ${textLabels[d.key].color};">${textLabels[d.key].text}</div>`);
+
+		bounds_stacked_area.append("g")
+			.attr("class", "annotation")
+			.attr("transform", "translate(276, 16)")
+			.call(g => {
+				g.append("text")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("text-anchor", "middle")
+					.style("font-size", "14px")
+					.style("fill", "black")
+					.call(text => {
+						text.append("tspan")
+							.attr("x", 0)
+							.attr("dy", "1.2em")
+							.text("6/58 lotto only");
+						text.append("tspan")
+							.attr("x", 0)
+							.attr("dy", "1.2em")
+							.text("started in 2015");
+					});
+
+				g.append("line")
+					.attr("x1", 0)
+					.attr("y1", 40)
+					.attr("x2", 0)
+					.attr("y2", 477)
+					.style("stroke", "black")
+					.style("stroke-width", "1px")
+					.style("stroke-dasharray", "2,2");
+			});
+
+		bounds_stacked_area.append("g")
+			.attr("class", "annotation")
+			.attr("transform", "translate(552, 0)")
+			.call(g => {
+				g.append("text")
+					.attr("x", 0)
+					.attr("y", 0)
+					.attr("text-anchor", "middle")
+					.style("font-size", "14px")
+					.style("fill", "black")
+					.call(text => {
+						text.append("tspan")
+							.attr("x", 0)
+							.attr("dy", "1.2em")
+							.text("Fewer lotto draws held");
+						text.append("tspan")
+							.attr("x", 0)
+							.attr("dy", "1.2em")
+							.text("during the first months");
+						text.append("tspan")
+							.attr("x", 0)
+							.attr("dy", "1.2em")
+							.text("of Covid-19 pandemic");
+					});
+
+				g.append("line")
+					.attr("x1", 0)
+					.attr("y1", 54)
+					.attr("x2", 0)
+					.attr("y2", 494)
+					.style("stroke", "black")
+					.style("stroke-width", "1px")
+					.style("stroke-dasharray", "2,2");
+			});
+	</script>
+</body>
+
+</html>
