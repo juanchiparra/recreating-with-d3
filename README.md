@@ -2,7 +2,7 @@
 
 Each week I'll be recreating a data visualization that has caught my attention from a media outlet. Regardless of the way it was visualized or the tools that were used, I'll try to recreate it using D3.js.
 
-It's a personal challenge to keep learning.
+It's a personal challenge to keep learning: https://juanchiparra.github.io/recreating-with-d3/
 
 
 | Week | Source | Code | Visualization |
