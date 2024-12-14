@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a beeswarm plot</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="beeswarm_plot.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a beeswarm plot</h1>
+			<span class="date">December 13, 2024</span>
+		</section>
+		<section class="introduction">
+			<p>
+				This week I recreated a beeswarm plot from <a
+					href="https://www.univision.com/especiales/noticias/infografias/2023/edad-senado/index-en.html"
+					class="external" ;>Univision</a> on the age of U.S. senators and the aging of the chamber.
+				Amaya Verde y Javier Figueroa participated in its creation.
+			</p>
+			<span>Warning: Data may be inaccurate compared to the source.</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1" class="container">
+			</div>
+		</section>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				This is the first beeswarm plot I visualize during the challenge. It's one of my favorite plots,
+				especially when used with <a href="https://d3js.org/d3-force" class="external">d3.force</a>. In my
+				Scrollytelling projects with Svelte, a beeswarm is always included.
+			</p>
+			<ul>
+				<li>
+					It was a challenging redesign, with a lot of trial and error. At first, it was difficult to
+					replicate the position of the nodes, but I managed to adjust the force well
+				</li>
+				<li>
+					This is the first time I cannot complete the redesign by Wednesday. I had a rough week and had to
+					hold off for two days
+				</li>
+				<li>
+					The most complicated thing, which I didn't even manage to do as I wanted and ended up giving up, was
+					the arrows. I still find it difficult to use the paths: M371,260 C351,240 350,240 330,240
+					<b>(?)</b>...
+				</li>
+			</ul>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data } from './beeswarm_plot.js';
+
+		// Create chart dimensions
+		const width = 630;
+		const height = 700;
+		const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+		const wrapper_beeswarm_plot = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 630 700")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		const bounds_beeswarm_plot = wrapper_beeswarm_plot.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		// Create scales
+		const x = d3.scaleLinear()
+			.range([margin.left, width - margin.right]);
+
+		const y = d3.scaleLinear()
+			.domain([21, 99])
+			.range([height - margin.bottom, margin.top]);
+
+		// Draw gridlines	
+		const yGrid = d3.axisLeft(y)
+			.ticks(9)
+			.tickSize(-width + margin.left + margin.right)
+			.tickFormat('');
+
+		bounds_beeswarm_plot.append("g")
+			.attr("class", "grid")
+			.attr("transform", `translate(${margin.left},0)`)
+			.call(yGrid);
+
+		// Draw peripherals
+		const yAxis = d3.axisLeft(y)
+			.ticks(9)
+			.tickFormat(d => d === 90 ? "" : d)
+			.tickSize(0);
+
+		bounds_beeswarm_plot.append("g")
+			.attr("class", "axis")
+			.attr("transform", `translate(${margin.left},0)`)
+			.call(yAxis);
+
+		bounds_beeswarm_plot.append("text")
+			.attr("x", margin.left + 8)
+			.attr("y", margin.top + 50)
+			.attr("text-anchor", "middle")
+			.attr("font-size", "11px")
+			.attr("fill", "#959ca3")
+			.attr("font-weight", "500")
+			.text("Age");
+
+		bounds_beeswarm_plot.append("text")
+			.attr("x", margin.left - 2)
+			.attr("y", y(90) - 6)
+			.attr("text-anchor", "start")
+			.attr("font-size", "10px")
+			.attr("fill", "#959ca3")
+			.text("90 years old");
+
+		bounds_beeswarm_plot.append("line")
+			.attr("class", "line")
+			.attr("x1", margin.left)
+			.attr("x2", width - margin.right)
+			.attr("y1", y(62))
+			.attr("y2", y(62));
+
+		bounds_beeswarm_plot.append("rect")
+			.attr("class", "rect")
+			.attr("x", (width - 75) / 2)
+			.attr("y", y(90))
+			.attr("width", 75)
+			.attr("height", y(62) - y(90));
+
+		// Draw data
+		const simulation = d3.forceSimulation(data)
+			.force("y", d3.forceY(d => y(d.age)).strength(1))
+			.force("x", d3.forceX(width / 2))
+			.force("forceX", d3.forceX(d => width / 2).strength(0.0005))
+			.force("forceY", d3.forceY(d => y(d.age)).strength(1))
+			.force("collide", d3.forceCollide(4.2))
+			.stop();
+
+		for (let i = 0; i < 120; ++i) simulation.tick();
+
+		bounds_beeswarm_plot.append("g")
+			.selectAll("circle")
+			.data(data)
+			.enter().append("circle")
+			.attr("class", "dot")
+			.attr("r", 4)
+			.attr("cx", d => d.x)
+			.attr("cy", d => d.y)
+			.attr("fill", d => d.age > 61 ? "#fedade" : "#e4f3f0")
+			.attr("stroke", d => d.highlight ? "black" : (d.age > 61 ? "#fe7d8f" : "#68c171")).attr("stroke-width", 0.6);
+
+		bounds_beeswarm_plot.append("g")
+			.selectAll("text")
+			.data(data.filter(d => d.highlight))
+			.enter().append("text")
+			.attr("x", d => d.x)
+			.attr("y", d => d.y + 2.4)
+			.attr("text-anchor", "middle")
+			.attr("font-size", "6px")
+			.attr("font-weight", "600")
+			.attr("fill", "black")
+			.text("X");
+
+		bounds_beeswarm_plot.append("text")
+			.attr("x", width - margin.right)
+			.attr("y", 326)
+			.attr("font-size", "12px")
+			.attr("fill", "#ff4960")
+			.attr("font-weight", "700")
+			.attr("text-anchor", "end")
+			.text("US average retirement age (62)")
+
+		bounds_beeswarm_plot.append("text")
+			.attr("x", width / 2 + 20)
+			.attr("y", 472)
+			.attr("font-size", "11px")
+			.attr("fill", "#7d858e")
+			.attr("text-anchor", "start")
+			.text("Each point represents")
+			.append("tspan")
+			.attr("x", width / 2 + 20)
+			.attr("dy", "1.2em")
+			.text("a Senator");
+
+		bounds_beeswarm_plot.append("line")
+			.attr("x1", width / 2 + 4)
+			.attr("x2", width / 2 + 18)
+			.attr("y1", 468.5)
+			.attr("y2", 468.5)
+			.attr("stroke", "black")
+			.attr("stroke-width", 0.3);
+
+		// Add images
+		const images = [
+			{ href: "img/charles-grassley.png", x: 288, y: 97, age: 90, text: "Charles Grassley", subtext: "The oldest senator" },
+			{ href: "img/thomas-carper.png", x: 210, y: 86, age: 76, text: "Tom Carper" },
+			{ href: "img/benjamin-cardin.png", x: 366, y: 86, age: 80, text: "Ben Cardin" },
+			{ href: "img/joe-manchin.png", x: 210, y: 78, age: 76, text: "Joe Manchin" },
+			{ href: "img/mitt-romney.png", x: 366, y: 78, age: 76, text: "Mitt Romney" },
+			{ href: "img/mike-braun.png", x: 210, y: 71, age: 69, text: "Mike Braun" },
+			{ href: "img/debbie-stabenow.png", x: 366, y: 71, age: 73, text: "Debbie Stabenow" },
+			{ href: "img/jon-ossoff.png", x: 288, y: 35, age: 36, text: "Jon Ossoff", subtext: "The youngest senator" },
+		];
+		images.forEach(image => {
+			bounds_beeswarm_plot.append("image")
+				.attr("xlink:href", image.href)
+				.attr("x", image.x)
+				.attr("y", y(image.y))
+				.attr("width", 50)
+				.attr("height", 50);
+
+			bounds_beeswarm_plot.append("circle")
+				.attr("cx", image.x + 45)
+				.attr("cy", y(image.y) + 45)
+				.attr("r", 12)
+				.attr("fill", d => image.y > 60 ? "#ff4960" : "#28A745")
+				.attr("stroke", "white")
+				.attr("stroke-width", 1);
+
+			bounds_beeswarm_plot.append("text")
+				.attr("x", image.x + 45)
+				.attr("y", y(image.y) + 50)
+				.attr("font-size", "12px")
+				.attr("fill", "white")
+				.attr("text-anchor", "middle")
+				.text(image.age);
+
+			bounds_beeswarm_plot.append("text")
+				.attr("x", image.x < width / 2 ? image.x - 10 : image.x + 55)
+				.attr("y", y(image.y) + 25)
+				.attr("font-size", "12px")
+				.attr("fill", "black")
+				.attr("font-weight", "600")
+				.attr("text-anchor", image.x < width / 2 ? "end" : "start")
+				.text(image.text);
+
+			bounds_beeswarm_plot.append("text")
+				.attr("x", image.x < width / 2 ? image.x - 10 : image.x + 55)
+				.attr("y", y(image.y) + 37.5)
+				.attr("font-size", "11px")
+				.attr("fill", "black")
+				.attr("text-anchor", "end")
+				.text(image.subtext || "");
+		});
+
+		// Draw arrows
+		wrapper_beeswarm_plot.append("defs")
+			.append("marker")
+			.attr("id", "arrowhead")
+			.attr("markerWidth", 4)
+			.attr("markerHeight", 4)
+			.attr("refX", 0)
+			.attr("refY", 2)
+			.attr("orient", "auto")
+			.append("polygon")
+			.attr("points", "0 0, 4 2, 0 4");
+
+		const arrows = [
+			{ type: 'line', x1: 258, y1: 214, x2: 282, y2: 214 },
+			{ type: 'line', x1: 371, y1: 214, x2: 349, y2: 214 },
+			{ type: 'line', x1: 258, y1: 274, x2: 278, y2: 274 },
+			{ type: 'curve', d: 'M258,156 C278,160 300,200 300,206' },
+			{ type: 'curve', d: 'M371,146 C351,136 340,140 324,170' },
+			{ type: 'curve', d: 'M371,260 C351,240 350,240 330,240' }
+		];
+
+		arrows.forEach(arrow => {
+			if (arrow.type === 'line') {
+				bounds_beeswarm_plot.append("line")
+					.attr("x1", arrow.x1)
+					.attr("y1", arrow.y1)
+					.attr("x2", arrow.x2)
+					.attr("y2", arrow.y2)
+					.attr("stroke", "black")
+					.attr("marker-end", "url(#arrowhead)");
+			} else if (arrow.type === 'curve') {
+				bounds_beeswarm_plot.append("path")
+					.attr("d", arrow.d)
+					.attr("stroke", "black")
+					.attr("fill", "none")
+					.attr("marker-end", "url(#arrowhead)");
+			}
+		});
+	</script>
+</body>
+
+</html>
