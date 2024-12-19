@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a stacked bar chart</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="stacked-bar.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a stacked bar chart</h1>
+			<span class="date">December 18, 2024</span>
+		</section>
+		<section class="introduction">
+			<p>
+				This week I recreated a stacked bar chart from <a
+					href="https://www.economist.com/graphic-detail/2024/11/26/how-many-ukrainian-soldiers-have-died"
+					class="external" ;>The Economist</a> on Ukrainian soldier casualties in the Russia-Ukraine war.
+			</p>
+			<span>Warning: Data may be inaccurate compared to the source.</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1">
+				<h3 class="title">Ukrainian soldier casualties in Russia-Ukraine war*</h3>
+				<p class="subtitle">Recorded February 24th 2022 - November 19th 2024</p>
+				<div class="legend-container">
+					<div class="legend">
+						<div class="legend-item">
+							<div style="width: 10px; height: 10px; background-color: #c11614; margin-right: 4px;"></div>
+							<span>Killed</span>
+						</div>
+						<div class="legend-item">
+							<div style="width: 10px; height: 10px; background-color: #fcb1a2; margin-right: 4px;"></div>
+							<span>Injured, low estimate <sup>†</sup></span>
+						</div>
+						<div class="legend-item">
+							<div
+								style="width: 10px; height: 10px; background-color: #fef0ed; border: 1px solid #f6423c; margin-right: 4px;">
+							</div>
+							<span>Injured, high estimate <sup>‡</sup></span>
+						</div>
+					</div>
+				</div>
+				<div class="chart-container">
+					<hr>
+					<h3 class="chart-title">By age group, ’000</h3>
+					<div id="chart1"></div>
+				</div>
+				<div class="chart-container">
+					<hr>
+					<h3 class="chart-title">As % of male population</h3>
+					<div id="chart2"></div>
+				</div>
+			</div>
+			<div>
+				<div class="container">
+					<p class="left">Sources: UALosses; UN</p>
+					<div class="right">
+						<p class="legend2">*57,118 known fatalities with age listed. Data do not include all fatalities
+						</p>
+						<p class="legend2"><sup>†</sup> Assuming six per fatality &nbsp;<sup>‡</sup> Assuming eight per
+							fatality</p>
+					</div>
+				</div>
+			</div>
+		</section>
+		</div>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				This is the first stacked bar chart that I recreated during the challenge. I love stacked charts, they
+				have always pleased me visually. Although they can be tricky sometimes, they get simpler when you get
+				the hang of them.
+			</p>
+			<ul>
+				<li>
+					To be honest, I had a hurdle that I had to overcome with creativity. What you see in each bar as a
+					border, is actually another bar,
+					a little bit bigger in order to create that border. I tried to do it with the use of SVG stroke and
+					CSS, but I could
+					never get it to do it on the whole bar, it did it on each of the divisions
+				</li>
+				<li>
+					I'm still waiting for an opportunity to do a recreation with two versions depending on screen size.
+					So far I have made size adjustments to make it easier to read and visually more pleasing, more
+					responsive, but I want to get one where I can make more adjustments, that is more personalized. A
+					few weeks ago I heard about <a href="https://fossheim.io/writing/" class="external">Sarah L. Fossheim</a> and her views on accessibility in data visualization.
+					I recommend you read this gem: <a href="https://fossheim.io/writing/posts/2024-dataviz-a11y-elections/" class="external">Dataviz accessibility principles, demonstrated by the 2024
+					presidential election dashboards</a>. I'm sure that in my own style of visualization (which I'm still defining), accessibility will be taken into account
+				</li>
+			</ul>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data1, data2 } from './stacked-bar.js';
+
+		// Create chart dimensions
+		const width = 500;
+		const height = 400;
+		const margin = { top: 30, right: 0, bottom: 20, left: 60 };
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+		const wrapper_stacked_bar = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 1000 400")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		const bounds_beeswarm_plot = wrapper_stacked_bar
+			.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		const chart1 = bounds_beeswarm_plot.append("g")
+			.attr("transform", `translate(0,0)`);
+
+		const chart2 = bounds_beeswarm_plot.append("g")
+			.attr("transform", `translate(${innerWidth + margin.left},0)`);
+
+		// Create scales
+		const y0 = d3.scaleBand()
+			.domain(data1.map(d => d.category))
+			.range([10, innerHeight])
+			.paddingInner(0.3);
+
+		const y1 = d3.scaleBand()
+			.domain(data2.map(d => d.category))
+			.range([10, innerHeight])
+			.paddingInner(0.3);
+
+		const x0 = d3.scaleLinear()
+			.domain([0, 100])
+			.range([1, innerWidth - 100]);
+
+		const x1 = d3.scaleLinear()
+			.domain([0, 6])
+			.range([1, innerWidth - 100]);
+
+		const color = d3.scaleOrdinal()
+			.domain(['killed', 'injured_low', 'injured_high'])
+			.range(['#c11614', '#fcb1a2', '#fef0ed']);
+
+		const stack = d3.stack()
+			.keys(['killed', 'injured_low', 'injured_high']);
+
+		const series1 = stack(data1);
+		const series2 = stack(data2);
+
+		// Draw gridlines
+		const xAxisGrid = d3.axisTop(x0)
+			.tickSize(-innerHeight)
+			.tickFormat('')
+			.ticks(5);
+
+		const grid1 = chart1.append("g")
+			.attr("class", "grid")
+			.attr("transform", `translate(0,0)`)
+			.call(xAxisGrid);
+
+		const yAxisGrid = d3.axisTop(x1)
+			.tickSize(-innerHeight)
+			.tickFormat('')
+			.ticks(5);
+
+		const grid2 = chart2.append("g")
+			.attr("class", "grid")
+			.attr("transform", `translate(0,0)`)
+			.call(yAxisGrid);
+
+		// Draw data
+		chart1.append("g")
+			.selectAll("g")
+			.data(series1)
+			.enter().append("g")
+			.attr("class", "series")
+			.attr("fill", "#f6423c")
+			.selectAll("rect")
+			.data(d => d)
+			.enter().append("rect")
+			.attr("class", "bar-background")
+			.attr("y", d => y0(d.data.category) - 1.5)
+			.attr("x", d => x0(d[0]) - 1.5)
+			.attr("width", d => (x0(d[1]) - x0(d[0])) + 3)
+			.attr("height", y0.bandwidth() + 3);
+
+		chart2.append("g")
+			.selectAll("g")
+			.data(series2)
+			.enter().append("g")
+			.attr("class", "series")
+			.attr("fill", "#f6423c")
+			.selectAll("rect")
+			.data(d => d)
+			.enter().append("rect")
+			.attr("class", "bar-background")
+			.attr("y", d => y1(d.data.category) - 1.5)
+			.attr("x", d => x1(d[0]) - 1.5)
+			.attr("width", d => (x1(d[1]) - x1(d[0])) + 3)
+			.attr("height", y1.bandwidth() + 3);
+
+		chart1.append("g")
+			.selectAll("g")
+			.data(series1)
+			.enter().append("g")
+			.attr("class", "series")
+			.attr("fill", d => color(d.key))
+			.selectAll("rect")
+			.data(d => d)
+			.enter().append("rect")
+			.attr("class", "bar")
+			.attr("y", d => y0(d.data.category))
+			.attr("x", d => x0(d[0]))
+			.attr("width", d => x0(d[1]) - x0(d[0]))
+			.attr("height", y0.bandwidth());
+
+		chart2.append("g")
+			.selectAll("g")
+			.data(series2)
+			.enter().append("g")
+			.attr("class", "series")
+			.attr("fill", d => color(d.key))
+			.selectAll("rect")
+			.data(d => d)
+			.enter().append("rect")
+			.attr("class", "bar")
+			.attr("y", d => y1(d.data.category))
+			.attr("x", d => x1(d[0]))
+			.attr("width", d => x1(d[1]) - x1(d[0]))
+			.attr("height", y1.bandwidth());
+
+		// Draw peripherals
+		chart1.append("g")
+			.attr("class", "y-axis")
+			.attr("transform", `translate(0,0)`)
+			.call(d3.axisLeft(y0).tickSize(0));
+
+		chart1.append("g")
+			.attr("class", "x-axis")
+			.attr("transform", `translate(0,0)`)
+			.call(d3.axisTop(x0).ticks(5).tickSize(0))
+
+		chart2.append("g")
+			.attr("class", "y-axis")
+			.attr("transform", `translate(0,0)`)
+			.call(d3.axisLeft(y1).tickSize(0));
+
+		chart2.append("g")
+			.attr("class", "x-axis")
+			.attr("transform", `translate(0,0)`)
+			.call(d3.axisTop(x1).ticks(6).tickSize(0));
+	</script>
+</body>
+
+</html>
