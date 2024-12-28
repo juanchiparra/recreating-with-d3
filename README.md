@@ -19,3 +19,5 @@ It's a personal challenge to keep learning: https://juanchiparra.github.io/recre
 | W10  | [New York Times](https://www.nytimes.com/interactive/2024/10/30/upshot/voters-moving-polarization.html) | [2024/W10](/docs/2024/W10/dumbbell.html) | [Dumbbell plot](https://juanchiparra.github.io/recreating-with-d3/2024/W10/dumbbell.html) |
 | W11  | [Prinz Magtulis*](https://www.prinzmagtulis.com/lotto-ph/#g-prizes-Artboard_1-img) | [2024/W11](/docs/2024/W11/stacked-area.html) | [Stacked area chart](https://juanchiparra.github.io/recreating-with-d3/2024/W11/stacked-area.html) |
 | W12  | [Univision](https://www.univision.com/especiales/noticias/infografias/2023/edad-senado/index-en.html) | [2024/W12](/docs/2024/W12/beeswarm_plot.html) | [Beeswarm_plot](https://juanchiparra.github.io/recreating-with-d3/2024/W12/beeswarm_plot.html) |
+| W13  | [The Economist](https://www.economist.com/graphic-detail/2024/11/26/how-many-ukrainian-soldiers-have-died) | [2024/W13](/docs/2024/W13/stacked-bar.html) | [Stacked bar chart](https://juanchiparra.github.io/recreating-with-d3/2024/W13/stacked-bar.html) |
+
