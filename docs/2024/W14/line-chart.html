@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a line chart</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="line-chart.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Knowledge:wght@400;600&display=swap');
+	</style>
+</head>
+
+<body>
+
+	<body>
+		<main>
+			<section class="header">
+				<a href="../../index.html" class="back">
+					<span>← Back</span>
+				</a>
+				<h1>Recreating a line chart</h1>
+				<span class="date">December 27, 2024</span>
+			</section>
+			<section class="introduction">
+				<p>
+					This week I recreated a line chart from <a
+						href="https://www.faz.net/aktuell/wirtschaft/schneller-schlau/dax-erfolgsgeschichte-ueberdeckt-viele-maengel-110153827.html"
+						class="external" ;>Frankfurter Allgemeine Zeitung</a> on the performance of the DAX index over
+					the past years. Julia Bellan participated in its creation.
+				</p>
+				<span>Warning: Data may be inaccurate compared to the source.</span>
+			</section>
+			<section class="visualization">
+				<h2>Recreation</h2>
+				<div id="container1" class="container">
+				</div>
+			</section>
+			</div>
+			<section class="conclusion">
+				<h3>Highlights</h3>
+				<p>
+					This is the second line chart of the challenge, and although I liked the result, the difference in
+					the axes is noticeable. The data I found came with the values in euros, while the original was in
+					"points". I tried to adjust it, but I could never get it right.
+				</p>
+				<ul>
+					<li>
+						To practice, I imported the dirty data and cleaned it using D3. In any scenario, it is easier to
+						do it externally with Python, but I saw the opportunity and took advantage of it. D3 has several
+						ways to do it
+					</li>
+					<li>
+						I hadn't recreated a tooltip for a long time, especially one that was so fluid and had some
+						hidden tricks. When hovering around the line, the tooltip appeared, and the only way to
+						replicate it that I could think of was to make an invisible line with a bigger stroke behind the
+						main line. I've used this resource before, and it worked quite well. But I'm sure there will be
+						something else, or some other solution because the difference in fluidity is very evident.
+					</li>
+					<li>
+						I'll try to seek more diversity in the media I choose. It's also not something I can control 100% because I usually look for visualizations without looking so much at who made it. This is the first German media and I would like to get others from Europe in the coming weeks.
+					</li>
+				</ul>
+			</section>
+		</main>
+		<script type="module">
+			// Access data
+			import { data } from './line-chart.js';
+
+			const parseDate = d3.timeParse("%m/%Y");
+
+			data.forEach(d => {
+				d.year = parseDate(d.year);
+			});
+
+			// Create chart dimensions
+			const width = 950;
+			const height = 455;
+			const margin = {
+				top: 60,
+				right: 60,
+				bottom: 26,
+				left: 60
+			}
+
+			const innerWidth = width - margin.left - margin.right;
+			const innerHeight = height - margin.top - margin.bottom;
+
+			// Draw canvas
+			const wrapper_line_chart = d3.select("#container1")
+				.append("svg")
+				.attr("viewBox", "0 0 950 455")
+				.attr("preserveAspectRatio", "xMidYMid meet");
+
+			const bounds_line_chart = wrapper_line_chart.append("g")
+				.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+			const tooltip_line = d3.select("#container1")
+				.append("div")
+				.attr("id", "tooltip_line")
+				.attr("class", "tooltip")
+				.style("opacity", 0);
+
+			// Create scales
+			const x = d3.scaleTime()
+				.domain(d3.extent(data, d => d.year))
+				.range([0, innerWidth]);
+
+			const y = d3.scaleLinear()
+				.domain([0, d3.max(data, d => d.value)])
+				.range([innerHeight, 0]);
+
+			bounds_line_chart.append("g")
+				.attr("transform", `translate(0,${innerHeight})`)
+				.attr("class", "axis-x")
+				.call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y")));
+
+			bounds_line_chart.append("g")
+				.attr("transform", `translate(-50, -10)`)
+				.attr("class", "axis-y")
+				.call(d3.axisLeft(y).ticks(5));
+
+			// Draw gridlines
+			const yAxisGrid = d3.axisLeft(y)
+				.tickSize(-innerWidth - 60)
+				.tickFormat('')
+				.ticks(5);
+
+			const grid = bounds_line_chart.append('g')
+				.attr('class', 'grid')
+				.attr("transform", `translate(-60, 0)`)
+				.call(yAxisGrid);
+
+			grid.selectAll("line")
+				.filter((d, i) => i === 0)
+				.classed("first-line", true);
+
+			// Add labels
+			const labels = [
+				{ x: "1/1988", y: 235000, text: "<b>16.Oktober 1989:</b><br> Der erste schwarze Tag: Nach einem Börsencrash in New York bricht der Day um 13 Prozent ein", width: 150 },
+				{ x: "1/1990", y: 435000, text: "<b>18. November 1996:</b><br> Die Telekom bringt die T-Aktie an die Börse. Ausgabepreis 28,50 Mark. Es ist der Beginn eines langjährigen Technologiebooms", width: 209 },
+				{ x: "3/1997", y: 317500, text: "<b>7. März 2000:</b><br> Der Dax schließt über 8.000 Punkten. Die Telekom-Aktie kostet 100 Euro. Danach platzt die Dotcom-Blase", width: 170 },
+				{ x: "6/2004", y: 275000, text: "<b>15. September 2008:</b><br> Pleite von Lehman-Brothers", width: 130 },
+				{ x: "1/2008", y: 417500, text: "<b>23. April 2010:</b><br> Griechenland stellt Hilfsantrag, Irland im November, im April 2011 Portugal", width: 110 },
+				{ x: "1/2010", y: 95000, text: "<b>26. Juli 2012:</b> EZB-Chef Mario Draghi kündigt an, die EZB werde alles tun, um den Euro zu retten", width: 190 },
+				{ x: "1/2014", y: 425000, text: "<b>Juni 2014:</b><br> Die EZB führt einen negativen Einlagenzins von -0,1 % ein, bis März 2011 folgen drei weitere Schritte auf -0,4 %", width: 180 },
+				{ x: "1/2018", y: 175000, text: "<b>19. Juni 2020:</b><br> Ad-hoc-Meldung zum Bilanzskandal von Wirecard", width: 160 },
+				{ x: "6/2021", y: 250000, text: "<b>20. September 2021:</b><br> Dax 40-Erweiterung", width: 130 },
+				{ x: "1/2020", y: 510000, text: "<b>3. Dezember 2024:</b><br> Der Dax steigt erstmals auf über 20.000 Punkte", width: 140 }
+			];
+
+			const lines = [
+				{ x1: "10/1989", y1: 145000, x2: "10/1989", y2: 45000 },
+				{ x1: "6/1996", y1: 360000, x2: "6/1996", y2: 65000 },
+				{ x1: "2/2000", y1: 228000, x2: "2/2000", y2: 175000 },
+				{ x1: "8/2008", y1: 230000, x2: "8/2008", y2: 150000 },
+				{ x1: "1/2010", y1: 325000, x2: "1/2010", y2: 140000 },
+				{ x1: "6/2012", y1: 100000, x2: "6/2012", y2: 135000 },
+				{ x1: "5/2014", y1: 335000, x2: "5/2014", y2: 227500 },
+				{ x1: "7/2020", y1: 270000, x2: "7/2020", y2: 175000 },
+				{ x1: "9/2021", y1: 250000, x2: "9/2021", y2: 340000 },
+				{ x1: "9/2024", y1: 456000, x2: "9/2024", y2: 440000 }
+			];
+
+			lines.forEach(line => {
+				bounds_line_chart.append("line")
+					.attr("x1", x(parseDate(line.x1)))
+					.attr("y1", y(line.y1))
+					.attr("x2", x(parseDate(line.x2)))
+					.attr("y2", y(line.y2))
+					.attr("stroke", "#181816")
+					.attr("stroke-width", 1);
+			});
+
+			function wrap(text) {
+				text.each(function (d) {
+					var text = d3.select(this),
+						words = text.text().split(/\s+/).reverse(),
+						word,
+						line = [],
+						lineNumber = 0,
+						lineHeight = 1.1,
+						y = text.attr("y"),
+						dy = parseFloat(text.attr("dy")) || 0,
+						tspan = text.text(null).append("tspan").attr("x", text.attr("x")).attr("y", y).attr("dy", dy + "em");
+					while (word = words.pop()) {
+						line.push(word);
+						tspan.text(line.join(" "));
+						if (tspan.node().getComputedTextLength() > d.width) {
+							line.pop();
+							tspan.text(line.join(" "));
+							line = [word];
+							tspan = text.append("tspan").attr("x", text.attr("x")).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+						}
+					}
+				});
+			}
+
+			bounds_line_chart.selectAll("foreignObject")
+				.data(labels)
+				.enter()
+				.append("foreignObject")
+				.attr("x", d => x(parseDate(d.x)))
+				.attr("y", d => y(d.y))
+				.attr("width", d => d.width)
+				.attr("height", 100)
+				.append("xhtml:div")
+				.style("font-size", "12px")
+				.style("color", "#181816")
+				.html(d => d.text);
+
+			bounds_line_chart.append("text")
+				.attr("x", innerWidth)
+				.attr("y", y(439414))
+				.attr("text-anchor", "start")
+				.style("font-size", "11px")
+				.style("fill", "#fe5f55")
+				.style("font-weight", "bold")
+				.text("439.414");
+
+			// Draw data
+			const line = d3.line()
+				.x(d => x(d.year))
+				.y(d => y(d.value));
+
+			bounds_line_chart.append("path")
+				.datum(data)
+				.attr("class", "line")
+				.attr("d", line)
+				.on("mouseover", (event, d) => {
+					d3.select(event.currentTarget)
+						.transition()
+						.duration(100)
+						.attr("opacity", "1");
+
+					tooltip_line.transition()
+						.duration(50)
+						.style("opacity", 1);
+				})
+				.on("mouseout", (event, d) => {
+					d3.select(event.currentTarget)
+						.transition()
+						.duration(500)
+						.attr("opacity", "1");
+
+					tooltip_line.transition()
+						.duration(50)
+						.style("opacity", 0);
+				});
+
+			bounds_line_chart.append("path")
+				.datum(data)
+				.attr("class", "line-hover")
+				.attr("d", line)
+				.style("fill", "none")
+				.style("stroke", "transparent")
+				.style("stroke-width", "30px")
+				.on("mousemove", (event, d) => {
+					const [mouseX, mouseY] = d3.pointer(event);
+					const x0 = x.invert(mouseX);
+					const i = d3.bisector(d => d.year).left(d, x0, 1);
+					const d0 = d[i - 1];
+					const d1 = d[i];
+					const hoverdata = x0 - d0.year > d1.year - x0 ? d1 : d0;
+
+					const tooltipWidth = tooltip_line.node().offsetWidth;
+					const chartWidth = bounds_line_chart.node().getBoundingClientRect().width;
+					const tooltipX = mouseX > chartWidth / 3 ? (event.pageX - tooltipWidth - 10) : (event.pageX + 10);
+
+					const date = new Date(hoverdata.year);
+					const formattedDate = `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getFullYear()).slice(-2)}`;
+					const formattedValue = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hoverdata.value);
+
+					tooltip_line.html(`<div style="display: flex; align-items: center;"> <div style="width: 12px; height: 12px; background-color: #fe5f55; border-radius: 50%; margin-right: 5px;"></div> <b>DAX</b> </div> <b>${formattedDate}: ${formattedValue}</b>`)
+						.style("left", tooltipX + "px")
+						.style("top", (event.pageY - 15) + "px")
+						.style("opacity", 1);
+
+					d3.select(".hover-circle")
+						.attr("cx", x(hoverdata.year))
+						.attr("cy", y(hoverdata.value))
+						.style("opacity", 1);
+				})
+				.on("mouseout", (event, d) => {
+					tooltip_line.style("opacity", 0);
+
+					d3.select(".hover-circle")
+						.style("opacity", 0);
+				});
+
+			bounds_line_chart.append("circle")
+				.attr("class", "hover-circle")
+				.attr("r", 4)
+				.style("opacity", 0);
+		</script>
+	</body>
+
+</html>
