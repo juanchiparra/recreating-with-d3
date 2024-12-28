@@ -20,4 +20,6 @@ It's a personal challenge to keep learning: https://juanchiparra.github.io/recre
 | W11  | [Prinz Magtulis*](https://www.prinzmagtulis.com/lotto-ph/#g-prizes-Artboard_1-img) | [2024/W11](/docs/2024/W11/stacked-area.html) | [Stacked area chart](https://juanchiparra.github.io/recreating-with-d3/2024/W11/stacked-area.html) |
 | W12  | [Univision](https://www.univision.com/especiales/noticias/infografias/2023/edad-senado/index-en.html) | [2024/W12](/docs/2024/W12/beeswarm_plot.html) | [Beeswarm_plot](https://juanchiparra.github.io/recreating-with-d3/2024/W12/beeswarm_plot.html) |
 | W13  | [The Economist](https://www.economist.com/graphic-detail/2024/11/26/how-many-ukrainian-soldiers-have-died) | [2024/W13](/docs/2024/W13/stacked-bar.html) | [Stacked bar chart](https://juanchiparra.github.io/recreating-with-d3/2024/W13/stacked-bar.html) |
+| W14  | [Frankfurter Allgemeine Zeitung](https://www.faz.net/aktuell/wirtschaft/schneller-schlau/dax-erfolgsgeschichte-ueberdeckt-viele-maengel-110153827.html#wrap-3c706e4e-83bc-4e32-b5a6-5202b58cb3f3) | [2024/W14](/docs/2024/W14/line-chart.html) | [Line chart](https://juanchiparra.github.io/recreating-with-d3/2024/W14/line-chart.html) |
+
 
