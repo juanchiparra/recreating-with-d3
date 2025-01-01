@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a beeswarm plot</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="beeswarm_plot.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a beeswarm plot</h1>
+			<span class="date">January 01, 2025</span>
+		</section>
+		<section class="introduction">
+			<p>
+				This week I recreated a beeswarm plot from <a
+					href="https://www.reuters.com/graphics/ALASKAAIR-BOEING/klvydkrlopg/" class="external" ;>Reuters</a>
+				on Boeing 737 MAX aircraft and door plugs.
+				Simon Scarr, Vijdan Mohammad Kawoosa, Adolfo Arranz and Jitesh participated in its creation.
+			</p>
+			<span>Warning: Data may be inaccurate compared to the source.</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1" class="container">
+			</div>
+		</section>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				This is the first recreation of 2025. Since January 1st is a day of rest, I chose a beeswarm plot
+				because I'm used to visualizing it. The most complicated thing was replicating the data and, again,
+				creating arrows with SVG.
+			</p>
+			<ul>
+				<li>
+					I know there are easier ways to create objects with SVG, there are generators and resources I could
+					use to make it easier, but in this learning process, I like to have obstacles. I still don't quite understand how to make certain curves, but I'm getting better at it.
+				</li>
+			</ul>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data } from './beeswarm_plot.js';
+
+		// Create chart dimensions
+		const width = 900;
+		const height = 600;
+		const margin = { top: 40, right: 40, bottom: 40, left: 64 };
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+		const wrapper_beeswarm_plot = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 900 670")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		const bounds_beeswarm_plot = wrapper_beeswarm_plot.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		// Create scales
+		const x = d3.scaleTime()
+			.domain([new Date(2017, 0), new Date(2024, 5)])
+			.range([margin.left, width - margin.right]);
+
+		const y = d3.scaleBand()
+			.domain(data.map(d => d.airlines))
+			.range([height - margin.bottom, margin.top])
+			.padding(0.1);
+
+		// Draw gridlines	
+		const yGrid = d3.axisLeft(y)
+			.ticks(9)
+			.tickSize(-width + margin.left + margin.right)
+			.tickFormat('');
+
+		bounds_beeswarm_plot.append("g")
+			.attr("class", "grid")
+			.attr("transform", `translate(${margin.left},0)`)
+			.call(yGrid);
+
+		// Draw peripherals
+		const yAxis = d3.axisLeft(y)
+			.ticks(9)
+			.tickSize(0);
+
+		bounds_beeswarm_plot.append("g")
+			.attr("class", "axis")
+			.attr("transform", `translate(${margin.left},0)`)
+			.call(yAxis);
+
+		const xAxis = d3.axisBottom(x)
+			.ticks(d3.timeYear.every(1))
+			.tickFormat(d3.timeFormat("%Y"));
+
+		bounds_beeswarm_plot.append("g")
+			.attr("class", "axis")
+			.attr("transform", `translate(0,${height - margin.bottom})`)
+			.call(xAxis);
+
+		// Add labels
+		bounds_beeswarm_plot.append("text")
+			.attr("x", width / 2 - 70)
+			.attr("y", height + 10)
+			.attr("text-anchor", "middle")
+			.attr("font-size", "15px")
+			.attr("fill", "#404040")
+			.attr("font-weight", "500")
+			.text("Operating since");
+
+		const text = [
+			{ text1: "Aircraft without", text2: "door plug", x: 250, y: 410, color: "#848484", fontsize: "13px" },
+			{ text1: "Aircraft with", text2: "door plug", x: 400, y: 85, color: "#ffb420", fontsize: "13px" },
+			{ text1: "Door plug blew off", text2: "on this Alaska jet", x: 620, y: 0, color: "#404040", fontsize: "15px" },
+		];
+
+		text.forEach(function (d) {
+			bounds_beeswarm_plot.append("text")
+				.attr("x", d.x)
+				.attr("y", d.y)
+				.attr("text-anchor", "start")
+				.attr("font-size", d.fontsize)
+				.attr("fill", d.color)
+				.attr("font-weight", "700")
+				.html(function () {
+					return '<tspan x="' + d.x + '" dy="0">' + d.text1 + '</tspan>' +
+						'<tspan x="' + d.x + '" dy="1.2em">' + d.text2 + '</tspan>';
+				});
+		});
+
+		// Draw data
+		const simulation = d3.forceSimulation(data)
+			.force("x", d3.forceX(d => x(new Date(d.date))).strength(1))
+			.force("y", d3.forceY(d => y(d.airlines) + y.bandwidth() / 2).strength(1))
+			.force("collide", d3.forceCollide(6))
+			.stop();
+
+		for (let i = 0; i < 120; ++i) simulation.tick();
+
+		bounds_beeswarm_plot.append("g")
+			.selectAll("circle")
+			.data(data)
+			.enter().append("circle")
+			.attr("class", "dot")
+			.attr("r", 5)
+			.attr("cx", d => d.x)
+			.attr("cy", d => d.y)
+			.attr("fill", d => d.doorplug === "Yes" ? "#ffd65b" : "#d2d2d2")
+			.attr("stroke", d => d.blewoff === "Yes" ? "black" : "none")
+			.attr("stroke-width", "2px");
+
+		// Draw arrows
+		wrapper_beeswarm_plot.append("defs")
+			.append("marker")
+			.attr("id", "arrowhead")
+			.attr("markerWidth", 6)
+			.attr("markerHeight", 6)
+			.attr("refX", 0)
+			.attr("refY", 3)
+			.attr("orient", "auto")
+			.append("polygon")
+			.attr("points", "0 0, 6 3, 0 6");
+
+		const arrows = [
+			{ d: 'M760,0 C789,0 789,0 789,106' }
+		];
+
+		arrows.forEach(arrow => {
+			bounds_beeswarm_plot.append("path")
+				.attr("d", arrow.d)
+				.attr("stroke", "black")
+				.attr("fill", "none")
+				.attr("marker-end", "url(#arrowhead)");
+		});
+	</script>
+</body>
+
+</html>
