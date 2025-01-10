@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a scatter plot</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="scatter.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<script src="https://d3js.org/d3-voronoi.v1.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a <br>scatter plot</h1>
+			<span class="date">January 10, 2025</span>
+		</section>
+		<section class="introduction">
+			<p>
+				This week I recreated a scatter plot from <a
+					href="https://www.nytimes.com/interactive/2023/02/06/world/turkey-earthquake-faultlines.html"
+					class="external" ;>The New York Times</a> on the deaths in major earthquakes since 1900 in Turkey
+				and Syria. Leanne Abraham, Henry Fountain and K.K. Rebecca Lai participated in its creation.
+			</p>
+			<span>Warning: Data may be inaccurate compared to the source.</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1" class="container">
+			</div>
+		</section>
+		</div>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				This is the first recreation of 2025 and the second scatter plot I did during the challenge. The base is
+				very similar, but seeing that it would take me a long time to replicate the data, I decided to use random
+				data.
+			</p>
+			<ul>
+				<li>
+					I only replicated the data of the earthquakes with more deaths, and for the rest, I created a
+					function called <b>randomDate</b> that generates up to 196 records with values within a certain range.
+					Every time the browser is refreshed, new random data will be generated. I use this often to check
+					how a visualization could look, and although it may look amazing, the important thing is that it
+					also works with the real data.
+				</li>
+				<li>
+					I love using <b>forEach()</b> for the creation of specific elements. Whether it's text or images, for me
+					it's the most comfortable way to create elements in different positions in the visualization. Of all
+					the ways I've tried, this is the one I feel most comfortable with.
+				</li>
+			</ul>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data } from './scatter.js';
+
+		// Create chart dimensions
+		const width = 1200;
+		const height = 560;
+		const margin = {
+			top: 100,
+			right: 40,
+			bottom: 40,
+			left: 40
+		};
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+		// Draw canvas
+		const wrapper_scatter = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 1200 560")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		const bounds_scatter = wrapper_scatter.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		// Create scales
+		const xScale_scatter = d3.scaleTime()
+			.domain([new Date(1896, 12), new Date(2025, 12)])
+			.range([0, innerWidth]);
+
+		const yScale_scatter = d3.scaleLinear()
+			.domain([4, 8])
+			.range([innerHeight, 0]);
+
+		// Draw gridlines
+		const xAxisGrid = d3.axisBottom(xScale_scatter)
+			.tickSize(-innerHeight * 1.06)
+			.tickFormat('')
+			.tickValues(d3.timeYear.range(new Date(1900, 0), new Date(2020, 0), 20).concat(new Date(2023, 0)));
+
+		const yAxisGrid = d3.axisLeft(yScale_scatter)
+			.tickSize(-innerWidth * 1.03)
+			.tickFormat('')
+			.ticks(5);
+
+		bounds_scatter.append('g')
+			.attr('class', 'x grid')
+			.attr('transform', `translate(0,${innerHeight})`)
+			.call(xAxisGrid);
+
+		bounds_scatter.append('g')
+			.attr('class', 'y grid')
+			.attr('transform', `translate(-20,-12)`)
+			.call(yAxisGrid);
+
+		// Draw data
+		bounds_scatter.append("g")
+			.selectAll("circle")
+			.data(data)
+			.enter()
+			.append("circle")
+			.attr("cy", d => yScale_scatter(d.magnitude))
+			.attr("cx", d => xScale_scatter(new Date(d.date)))
+			.attr("r", d => d.deaths)
+			.attr("opacity", 1)
+			.attr("fill", "rgba(0,204,255,0.1)")
+			.attr("stroke", d => d.stroke === 'black' || d.stroke === 'dashed' ? 'black' : '#0cf')
+			.attr("stroke-width", d => d.stroke === 'dashed' ? '2' : '1')
+			.attr("stroke-dasharray", d => d.stroke === 'dashed' ? '8 2' : 'none');
+
+		// Draw peripherals
+		bounds_scatter.append("g")
+			.attr("class", "axis")
+			.attr("transform", `translate(0,-20)`)
+			.call(d3.axisLeft(yScale_scatter).ticks(4))
+			.append("text")
+			.attr("class", "axis-label")
+			.attr("x", -6)
+			.attr("y", -4)
+			.attr("dy", "-1em")
+			.attr("text-anchor", "start")
+			.text("MAGNITUDE");
+
+		bounds_scatter.append("g")
+			.attr("class", "axis")
+			.attr("transform", `translate(0,${innerHeight})`)
+			.call(d3.axisBottom(xScale_scatter)
+				.tickValues(d3.timeYear.range(new Date(1900, 0), new Date(2020, 0), 20).concat(new Date(2023, 0)))
+				.tickFormat(d3.timeFormat("%Y")));
+
+		// Add labels
+		const multilineTexts = [
+			{
+				text: ["Turkey, 1939", "MAGNITUDE 7.7", "EST. DEATHS 32,000+"],
+				x: 372,
+				y: -70,
+				align: "middle"
+			},
+			{
+				text: ["Turkey, 1999", "MAGNITUDE 7.6", "EST. DEATHS 17,000+"],
+				x: 860,
+				y: -40,
+				align: "end"
+			},
+			{
+				text: ["Armenia, 1998", "MAGNITUDE 6.8", "EST. DEATHS 25,000+"],
+				x: 790,
+				y: 171,
+				align: "start",
+			},
+			{
+				text: ["Turkey and Syria, 2023", "MAGNITUDE 7.8", "EST. DEATHS 20,000+", "as of 1 p.m. E.T. on Feb. 9"],
+				x: 1136,
+				y: -85,
+				align: "end",
+			}
+		];
+
+		multilineTexts.forEach(item => {
+			const group = bounds_scatter.append("g");
+			item.text.forEach((d, i) => {
+				const textElement = group.append("text")
+					.attr("class", "label")
+					.attr("x", item.x)
+					.attr("y", item.y + i * 16)
+					.attr("text-anchor", item.align)
+					.style("fill", "#333")
+					.style("font-size", i === 0 ? "13.5px" : "11px")
+					.style("font-weight", i === 0 ? "bold" : "normal")
+					.text(d);
+
+				const bbox = textElement.node().getBBox();
+				group.insert("rect", "text")
+					.attr("x", bbox.x - 2)
+					.attr("y", bbox.y - 2)
+					.attr("width", bbox.width + 4)
+					.attr("height", bbox.height + 4)
+					.attr("fill", "#fdfdfd");
+			});
+		});
+
+	</script>
+</body>
+
+</html>
