@@ -23,6 +23,7 @@ It's a personal challenge to keep learning: https://juanchiparra.github.io/recre
 | W14  | [Frankfurter Allgemeine Zeitung](https://www.faz.net/aktuell/wirtschaft/schneller-schlau/dax-erfolgsgeschichte-ueberdeckt-viele-maengel-110153827.html#wrap-3c706e4e-83bc-4e32-b5a6-5202b58cb3f3) | [2024/W14](/docs/2024/W14/line-chart.html) | [Line chart](https://juanchiparra.github.io/recreating-with-d3/2024/W14/line-chart.html) |
 | W15  | [Reuters](https://www.reuters.com/graphics/ALASKAAIR-BOEING/klvydkrlopg/) | [2024/W15](/docs/2024/W15/beeswarm_plot.html) | [Beeswarm plot](https://juanchiparra.github.io/recreating-with-d3/2024/W15/beeswarm_plot.html) |
 | W16  | [New York Times](https://www.nytimes.com/interactive/2023/02/06/world/turkey-earthquake-faultlines.html) | [2025/W16](/docs/2025/W16/scatter.html) | [Scatter plot](https://juanchiparra.github.io/recreating-with-d3/2025/W16/scatter.html) |
+| W17  | [Bloomberg](https://www.bloomberg.com/news/features/2024-10-03/helene-reveals-how-us-is-not-prepared-for-billion-dollar-disasters) | [2025/W17](/docs/2025/W17/map.html) | [Map](https://juanchiparra.github.io/recreating-with-d3/2025/W17/map.html) |
 
 
 
