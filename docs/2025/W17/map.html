@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <title>Recreating a map</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link href="map.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <main>
+        <section class="header">
+            <a href="../../index.html" class="back">
+                <span>← Back</span>
+            </a>
+            <h1>Recreating a map</h1>
+            <span class="date">January 15, 2025</span>
+        </section>
+        <section class="introduction">
+            <p>
+                This week I recreated a map from <a
+                    href="https://www.bloomberg.com/news/features/2024-10-03/helene-reveals-how-us-is-not-prepared-for-billion-dollar-disasters"
+                    class="external" ;>Bloomberg</a> on the state distribution of natural disasters in the United
+                States.
+                Lauren Rosenthal, Brian K. Sullivan, and Christopher Cannon participated in
+                its creation.
+            </p>
+            <span>Warning: Data may be inaccurate compared to the source.</span>
+        </section>
+        <section class="visualization">
+            <h2>Recreation</h2>
+            <div id="container1" class="container">
+            </div>
+        </section>
+        <section class="conclusion">
+            <h3>Highlights</h3>
+            <p>
+                This is the first map for this year. I have wanted to make this kind of map for a long time, I found
+                that some people call it a "Grid Map", at least it makes sense to me. In my head, and as it has happened
+                to me a lot while learning D3, I thought there was a projection to use or a specific attribute of
+                d3-geo, something like <b>d3.geoPath(grid)</b>, but I got a surprise.
+            </p>
+            <ul>
+                <li>
+                    A map that is not a map, but ends up being a map, this is confusing, right? That's how I felt when I
+                    discovered that it was rectangles distributed in a grid. I had always thought that there was a way
+                    to do it with D3 and that one wouldn't have so much freedom to choose the position of the states.
+                    The way to do it seems very comfortable, and logical once I understand it. If you want to dig more
+                    into the subject, <a href="https://kristw.yellowpigz.com/" class="external">Krist Wongsuphasawat</a>
+                    has an amazing article talking about it: <a
+                        href="https://kristw.medium.com/whose-grid-map-is-better-quality-metrics-for-grid-map-layouts-e3d6075d9e80"
+                        class="external">Whose Grid Map is better? Quality Metrics for Grid Map Layouts</a>.
+                </li>
+                <li>
+                    This is the third challenge where I have to make arrows with SVG. I'm getting more and more
+                    comfortable with it and in this one, I was able to get it to appear just as I wanted it to.
+                </li>
+                <li>
+                    I'm happy to recreate a <a href="https://www.bloomberg.com/graphics" class="external">Bloomberg
+                        visualization</a>. I discovered <a href="https://mariepatino.com/" class="external">Marie
+                        Patino</a>, <a href="https://rachaeldottle.com/" class="external">Rachael Dottle</a> and <a
+                        href="https://elenaml.com/" class="external">Elena Mejía</a> some time ago and I
+                    try to follow closely what they do and they always surprise me. Also, don't miss the opportunity to
+                    follow them at <a href="https://x.com/BBGVisualData/highlights" class="external">BBGVisualData</a>.
+                </li>
+            </ul>
+        </section>
+    </main>
+    </main>
+    </main>
+    <script type="module">
+        // Access data
+        import { data } from './map.js';
+
+        const texts = [
+            {
+                states: data[0],
+                texts: [
+                    { x: 220, y: 285, lines: [{ text: "$30B–$35B", fontSize: 16 }, { text: "Hurricane Helene", fontSize: 12, bold: true }, { text: "September 2024", fontSize: 11 }], arrow: { startX: 216, startY: 278, controlX: 200, controlY: 260, endX: 216, endY: 240 } }
+                ]
+            },
+            {
+                states: data[1]
+            },
+            {
+                states: data[2]
+            },
+            {
+                states: data[3]
+            },
+            {
+                states: data[4],
+                texts: [
+                    { x: 60, y: 285, lines: [{ text: "$6B", fontSize: 16 }, { text: "Hawaii wildfires", fontSize: 12, bold: true }, { text: "August 2023", fontSize: 11 }], arrow: { startX: 64, startY: 266, controlX: 60, controlY: 240, endX: 36, endY: 237 } }
+                ]
+            },
+            {
+                states: data[5],
+                texts: [
+                    { x: 130, y: 285, lines: [{ text: "$27B", fontSize: 16 }, { text: "Winter Storm Uri", fontSize: 12, bold: true }, { text: "February 2021", fontSize: 11 }], arrow: { startX: 126, startY: 284, controlX: 100, controlY: 280, endX: 101, endY: 258 } }
+                ]
+            }
+        ];
+
+        texts.forEach((data, i) => {
+            // Create chart dimensions
+            const width = 200;
+            const height = 320;
+            const margin = {
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 1
+            };
+
+            const cellSize = 28;
+
+            // Draw canvas
+            const wrapper_map = d3.select("#container1")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("class", "map");
+
+            const colors = ["#00ff2a", "#ffc400", "#89d9fe", "#c697dc", "#fe466f", "#e0e0e0"];
+            const titles = ["Hurricane", "Drought", "Flooding", "Severe storm", "Wildfire", "Winter storm"];
+
+            // Add titles
+            wrapper_map.append("text")
+                .attr("x", 0)
+                .attr("y", 15)
+                .attr("text-anchor", "start")
+                .attr("font-size", 16)
+                .attr("font-weight", "bold")
+                .text(titles[i]);
+
+            // Draw data
+            wrapper_map.selectAll(".state")
+                .data(data.states)
+                .enter().append("rect")
+                .attr("class", "state")
+                .attr("x", d => d.col * cellSize + margin.left)
+                .attr("y", d => d.row * cellSize)
+                .attr("width", cellSize)
+                .attr("height", cellSize)
+                .attr("fill", d => d.condition ? colors[i] : "#fdfdfd")
+                .attr("stroke", d => d.condition ? "#232323" : "#ccc")
+                .attr("stroke-width", 1);
+
+            // Add state labels
+            wrapper_map.selectAll(".state-label")
+                .data(data.states)
+                .enter().append("text")
+                .attr("class", "state-label")
+                .attr("x", d => d.col * cellSize + cellSize / 2 + margin.left)
+                .attr("y", d => d.row * cellSize + cellSize / 2)
+                .attr("fill", d => d.condition ? "#232323" : "#ccc")
+                .attr("text-anchor", "middle")
+                .attr("alignment-baseline", "middle")
+                .text(d => d.abbr);
+
+            // Draw arrows
+            wrapper_map.append("defs").append("marker")
+                .attr("id", "arrow")
+                .attr("viewBox", "0 0 10 10")
+                .attr("refX", "5")
+                .attr("refY", "5")
+                .attr("markerWidth", "6")
+                .attr("markerHeight", "6")
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M 0 0 L 8 5 L 0 10 z")
+                .attr("fill", "black");
+
+            if (data.texts) {
+                data.texts.forEach(text => {
+                    const textElement = wrapper_map.append("text")
+                        .attr("x", text.x)
+                        .attr("y", text.y)
+                        .selectAll("tspan")
+                        .data(text.lines)
+                        .enter().append("tspan")
+                        .attr("x", text.x)
+                        .attr("dy", (d, i) => i === 0 ? 0 : 15)
+                        .attr("font-size", d => d.fontSize)
+                        .attr("font-weight", d => d.bold ? "bold" : "normal")
+                        .text(d => d.text);
+
+                    if (text.arrow) {
+                        wrapper_map.append("path")
+                            .attr("d", `M${text.arrow.startX},${text.arrow.startY} Q${text.arrow.controlX},${text.arrow.controlY} ${text.arrow.endX},${text.arrow.endY}`)
+                            .attr("stroke", "black")
+                            .attr("stroke-width", 1)
+                            .attr("fill", "none")
+                            .attr("marker-end", "url(#arrow)");
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
