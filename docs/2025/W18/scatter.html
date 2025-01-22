@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a scatter plot</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="scatter.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<script src="https://d3js.org/d3-voronoi.v1.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a <br>scatter plot</h1>
+			<span class="date">January 22, 2025</span>
+		</section>
+		<section class="introduction">
+			<p>
+				This week I recreated a scatter plot from <a
+					href="https://www.bloomberg.com/graphics/2024-china-outshines-japan-cars-southeast-asia/"
+					class="external" ;>Bloomberg</a> about the competition between Chinese and Japanese carmakers.
+				Yasufumi Saito, Jin Wu, and Nicholas Takahashi participated in its creation.
+			</p>
+			<span>Warning: Data may be inaccurate compared to the source.</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1" class="container">
+			</div>
+		</section>
+		</div>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				Another scatter plot for the challenge. I liked it because it was different. So far, I have not done
+				one where each element had two points with a connection. Although replicating the data was messy, I
+				liked the final result.
+			</p>
+			<ul>
+				<li>
+					I got stressed when I saw so many circles stepping on each other and thought "I'm going to arrange
+					them to make them look better". But that's just the way the data is and I shouldn't manipulate it
+					just to "improve the appearance". In the end, the goal of the challenge is to replicate, without
+					adding or subtracting (unless there is a specific reason).
+				</li>
+				<li>
+					If I gave up on anything, it was the arrows. At first, I was able to replicate them because I had
+					only two circles, but then when I added more data, the arrows didn't look right in all the circles.
+					No matter how hard I tried, in some, it looked right, and in others, it looked wrong. So I have the
+					task of investigating it.
+				</li>
+			</ul>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data } from './scatter.js';
+
+		// Create chart dimensions
+		const width = 620;
+		const height = 506;
+		const margin = {
+			top: 40,
+			right: 40,
+			bottom: 60,
+			left: 60
+		};
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+		// Draw canvas
+		const wrapper_scatter = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 620 506")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		const bounds_scatter = wrapper_scatter.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		// Create scales
+		const xScale_scatter = d3.scaleLinear()
+			.domain([0, 12])
+			.range([0, innerWidth]);
+
+		const yScale_scatter = d3.scaleLinear()
+			.domain([0, 80])
+			.range([innerHeight, 0]);
+
+		// Draw gridlines
+		const xAxisGrid = d3.axisBottom(xScale_scatter)
+			.tickSize(-innerHeight - 18)
+			.tickFormat('')
+			.ticks(5);
+
+		const yAxisGrid = d3.axisLeft(yScale_scatter)
+			.tickSize(-innerWidth - 25)
+			.tickFormat('')
+			.ticks(5);
+
+		bounds_scatter.append('g')
+			.attr('class', 'x grid')
+			.attr('transform', `translate(0,${innerHeight + 18})`)
+			.call(xAxisGrid);
+
+		bounds_scatter.append('g')
+			.attr('class', 'y grid')
+			.attr('transform', `translate(-25,0)`)
+			.call(yAxisGrid);
+
+		// Define gradients
+		const defs = bounds_scatter.append("defs");
+
+		const gradientRed = defs.append("linearGradient")
+			.attr("id", "gradientRed")
+			.attr("x1", "0%")
+			.attr("y1", "0%")
+			.attr("x2", "0%")
+			.attr("y2", "100%");
+		gradientRed.append("stop")
+			.attr("offset", "0%")
+			.attr("stop-color", "#ba3131");
+		gradientRed.append("stop")
+			.attr("offset", "100%")
+			.attr("stop-color", "white");
+
+		const gradientGrey = defs.append("linearGradient")
+			.attr("id", "gradientGrey")
+			.attr("x1", "0%")
+			.attr("y1", "0%")
+			.attr("x2", "0%")
+			.attr("y2", "100%");
+		gradientGrey.append("stop")
+			.attr("offset", "0%")
+			.attr("stop-color", "#808080");
+		gradientGrey.append("stop")
+			.attr("offset", "100%")
+			.attr("stop-color", "white");
+
+		// Draw data
+		data.forEach(d => {
+			const x1 = xScale_scatter(d.x1);
+			const y1 = yScale_scatter(d.y1);
+			const x2 = xScale_scatter(d.x2);
+			const y2 = yScale_scatter(d.y2);
+
+			// Draw line
+			bounds_scatter.append("line")
+				.attr("x1", x1)
+				.attr("y1", y1)
+				.attr("x2", x2)
+				.attr("y2", y2)
+				.attr("stroke", d.japanese === "yes" ? "url(#gradientRed)" : "url(#gradientGrey)")
+				.attr("stroke-width", 1)
+
+			// Draw first circle
+			bounds_scatter.append("circle")
+				.attr("cx", x1)
+				.attr("cy", y1)
+				.attr("r", 2.4)
+				.attr("fill", "white")
+				.attr("stroke", d.japanese === "yes" ? "#ba3131" : "#808080");
+
+			// Draw second circle
+			bounds_scatter.append("circle")
+				.attr("cx", x2)
+				.attr("cy", y2)
+				.attr("r", 3.6)
+				.attr("fill", d.japanese === "yes" ? "#ba3131" : "#808080")
+
+			// Add labels
+			bounds_scatter.append("text")
+				.attr("x", xScale_scatter(d.labelX))
+				.attr("y", yScale_scatter(d.labelY))
+				.attr("text-anchor", "start")
+				.attr("fill", d.japanese === "yes" ? "#ba3131" : "#808080")
+				.style("font-size", "14px")
+				.style("font-weight", d.japanese === "yes" ? "700" : "500")
+				.style("stroke", "white")
+				.style("stroke-width", "3px")
+				.style("paint-order", "stroke")
+				.text(d.brand);
+		});
+
+		// Draw peripherals
+		bounds_scatter.append("g")
+			.attr("class", "axis")
+			.attr("transform", `translate(-2,-10)`)
+			.call(d3.axisLeft(yScale_scatter).ticks(4));
+
+		bounds_scatter.append("g")
+			.attr("class", "axis")
+			.attr("transform", `translate(0,${innerHeight})`)
+			.call(d3.axisBottom(xScale_scatter).ticks(4))
+			.selectAll("text")
+			.attr("dy", "1.6em");
+
+		bounds_scatter.append("text")
+			.attr("class", "axis-label")
+			.attr("x", -27)
+			.attr("y", -7)
+			.attr("dy", "-1em")
+			.attr("text-anchor", "start")
+			.style("font-size", "13px")
+			.style("font-weight", "600")
+			.style("fill", "#5a5a5a")
+			.text("BNEF EV exposure score");
+
+		bounds_scatter.append("text")
+			.attr("class", "axis-label")
+			.attr("x", 154)
+			.attr("y", 465)
+			.attr("dy", "-1em")
+			.attr("text-anchor", "start")
+			.style("font-size", "13px")
+			.style("font-weight", "600")
+			.style("fill", "#5a5a5a")
+			.text("Annual sales (in million cars)");
+
+		bounds_scatter.append("text")
+			.attr("class", "y-axis-label")
+			.attr("x", -100)
+			.attr("y", -45)
+			.attr("text-anchor", "middle")
+			.style("font-size", "14px")
+			.style("font-weight", "600")
+			.style("font-style", "italic")
+			.attr("transform", "rotate(-90)")
+			.text("More active in EV segment →");
+
+		bounds_scatter.append("text")
+			.attr("class", "x-axis-label")
+			.attr("x", width - 100)
+			.attr("y", height - 50)
+			.attr("text-anchor", "end")
+			.style("font-size", "14px")
+			.style("font-weight", "600")
+			.style("font-style", "italic")
+			.text("More sales →");
+
+		// Add labels
+		const multilineTexts = [
+			{
+				text: [
+					"Position change",
+					"2018 <span style='display: inline-block; width: 4px; height: 4px; background-color: white; border: 1px solid black; border-radius: 50%; vertical-align: middle;'></span><span style='display: inline-block; width: 40px; height: 2px; background: linear-gradient(to left, black, white); vertical-align: middle;'></span><span style='display: inline-block; width: 9px; height: 9px; background-color: black; border-radius: 50%; vertical-align: middle;'></span> 2022",
+					"<span style='background-color: #ba3131; color: white; font-weight: 600; padding: 2px'>Japanese carmakers</span><span>&nbsphave been</span>",
+					"reluctant to bet on electric",
+					"vehicles, leading to some of the",
+					"biggest sales drops among peers"
+				],
+				x: 372,
+				y: 120,
+				align: "start"
+			}
+		];
+
+		multilineTexts.forEach(item => {
+			const group = bounds_scatter.append("g");
+			item.text.forEach((d, i) => {
+				const foreignObject = group.append("foreignObject")
+					.attr("x", 220)
+					.attr("y", item.y + i * 16)
+					.attr("width", 240)
+					.attr("height", 20)
+
+				foreignObject.append("xhtml:div")
+					.style("font-size", i === 0 ? "13.5px" : "14px")
+					.style("font-weight", i === 0 ? "bold" : "600")
+					.style("background-color", "#fdfdfd")
+					.style("color", "#333")
+					.style("width", "100%")
+					.style("box-sizing", "border-box")
+					.style("padding", "0 10px")
+					.html(d);
+			});
+		});
+	</script>
+</body>
+
+</html>
