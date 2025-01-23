@@ -143,6 +143,11 @@ p {
   opacity: 1;
 }
 
+footer {
+  text-align: center; 
+  margin: 40px;
+}
+
 /* Media Queries para diseño responsive */
 @media (max-width: 768px) {
   h1 {
