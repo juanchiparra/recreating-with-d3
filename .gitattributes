@@ -1,1 +1,3 @@
-docs/** linguist-detectable
+docs/**/*.html linguist-language=html
+docs/**/*.css linguist-language=css
+docs/**/*.js linguist-language=javascript
