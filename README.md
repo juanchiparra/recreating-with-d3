@@ -26,6 +26,3 @@ It's a personal challenge to keep learning: https://juanchiparra.github.io/recre
 | W17  | [Bloomberg](https://www.bloomberg.com/news/features/2024-10-03/helene-reveals-how-us-is-not-prepared-for-billion-dollar-disasters) | [2025/W17](/docs/2025/W17/map.html) | [Map](https://juanchiparra.github.io/recreating-with-d3/2025/W17/map.html) |
 | W18  | [Bloomberg](https://www.bloomberg.com/graphics/2024-china-outshines-japan-cars-southeast-asia/) | [2025/W18](/docs/2025/W18/scatter.html) | [Scatter plot](https://juanchiparra.github.io/recreating-with-d3/2025/W18/scatter.html) |
 
-
-
-
