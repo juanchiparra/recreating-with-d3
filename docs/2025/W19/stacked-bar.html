@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <title>Recreating a stacked bar chart</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link href="stacked-bar.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <main>
+        <section class="header">
+            <a href="../../index.html" class="back">
+                <span>← Back</span>
+            </a>
+            <h1>Recreating a stacked bar chart</h1>
+            <span class="date">January 29, 2025</span>
+        </section>
+        <section class="introduction">
+            <p>
+                This week I recreated a stacked bar chart from The <a
+                    href="https://www.nytimes.com/interactive/2020/08/11/opinion/us-coronavirus-black-mortality.html"
+                    class="external" ;>New York Times</a> on racial disparity in health care in the United States. Gus
+                Wezerek participated in its creation.
+            </p>
+            <span>Warning: Data may be inaccurate compared to the source.</span>
+        </section>
+        <section class="visualization">
+            <h2>Recreation</h2>
+            <div id="container1" class="container">
+            </div>
+        </section>
+        </div>
+        <section class="conclusion">
+            <h3>Highlights</h3>
+            <p>
+                One more stacked bar chart for the challenge. It was a recreation that I enjoyed doing because of the
+                style of the chart and the challenges it brought with it.
+            </p>
+            <ul>
+                <li>
+                    I still find it a challenge to create patterns with SVG. Sometimes I succeed on the first try and at
+                    other times I'm unable to make a simple line. Sometimes I try to add more space or separate lines
+                    and the pattern is completely damaged. Even if I haven't used it, I found <a
+                        href="https://iros.github.io/patternfills/sample_d3.html" class="external">this resource</a>
+                    that might
+                    help
+                    me in the future. The most important thing: <b>we keep learning</b>
+                </li>
+                <li>
+                    I have found that I feel more comfortable adjusting the style of the axes, being able to use
+                    <b>.ticks</b>
+                    and <b>.domain</b> to make specific adjustments, plus the ability to use D3 for filtering, we have a
+                    lot of
+                    control. In the beginning, I was going crazy figuring out how to remove a simple tick, a "line" that
+                    I didn't understand.
+                </li>
+                <li>
+                    This style used in the article by <a href="https://www.linkedin.com/in/gus-w-085ab315/"
+                        class="external">Gus Wezerek</a> led me to make a decision: I'll use it to participate in
+                    <a href="https://www.the100dayproject.org/" class="external">#The100DayProject</a>. For 100 days,
+                    I'll use this style to create 100 charts. I was previously
+                    inclined to do it with maps, but I feel I have too little experience to be consistent for so many
+                    days, and although I have the thirst to learn, I also have other projects and responsibilities.
+                    Don't miss the opportunity to check out the other charts in the <a
+                        href="https://www.nytimes.com/interactive/2020/08/11/opinion/us-coronavirus-black-mortality.html"
+                        class="external">article</a>.
+                </li>
+            </ul>
+        </section>
+    </main>
+    <script type="module">
+        // Access data
+        import { data } from './stacked-bar.js';
+
+        // Create chart dimensions
+        const width = 900;
+        const height = 600;
+        const margin = {
+            top: 80,
+            right: 60,
+            bottom: 80,
+            left: 60
+        }
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+
+        // Draw canvas
+        const wrapper_bar = d3.select("#container1")
+            .append("svg")
+            .attr("viewBox", "0 0 900 600")
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        const bounds_bar = wrapper_bar.append("g")
+            .style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+        // Define diagonal pattern
+        const defs = wrapper_bar.append("defs");
+
+        defs.append("pattern")
+            .attr("id", "diagonalHatch")
+            .attr("patternUnits", "userSpaceOnUse")
+            .attr("width", 10)
+            .attr("height", 10)
+            .append("rect")
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", "white");
+
+        defs.select("#diagonalHatch")
+            .append("path")
+            .attr("d", "M10,0 l-10,10 M15,5 l-10,10 M5,-5 l-10,10")
+            .attr("stroke", "black")
+            .attr("stroke-width", 0.9);
+
+        // Create scales
+        const x = d3.scaleTime()
+            .domain([new Date(1899, 12, 1), new Date(2015, 11, 31)])
+            .range([0, innerWidth]);
+
+        const y = d3.scaleLinear()
+            .domain([0, 1000])
+            .nice()
+            .range([innerHeight, 0]);
+
+        const barWidth = innerWidth / data.length;
+
+        // Draw peripherals
+        bounds_bar.append("g")
+            .attr("class", "x-axis")
+            .attr("transform", `translate(0,${innerHeight})`)
+            .call(d3.axisBottom(x)
+                .tickValues([new Date(1910, 0, 1), new Date(1930, 0, 1), new Date(1950, 0, 1), new Date(1970, 0, 1), new Date(1990, 0, 1), new Date(2010, 0, 1)])
+                .tickFormat(d3.timeFormat("%Y"))
+                .tickPadding(8)
+                .tickSize(8))
+            .selectAll(".domain")
+            .remove();
+
+        bounds_bar.append("g")
+            .attr("class", "y-axis")
+            .call(d3.axisLeft(y).ticks(2).tickFormat(d => {
+                if (d === 1000) return "1M";
+                if (d === 500) return "500K";
+                return d;
+            }).tickPadding(20))
+            .selectAll(".domain")
+            .remove();
+
+        // Draw gridlines
+        bounds_bar.append("g")
+            .attr("class", "grid")
+            .attr("transform", "translate(-20, 0)")
+            .call(d3.axisLeft(y).ticks(3)
+                .tickSize(-innerWidth * 1.04)
+                .tickFormat(""))
+            .selectAll(".tick line")
+            .attr("class", (d, i, nodes) => i === 0 ? "bottom-line" : "grid-line");
+
+        // Draw data
+        bounds_bar.selectAll(".bar-background")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar-background")
+            .attr("x", d => x(new Date(d.date)) + 1)
+            .attr("y", d => y(d.value2) + 1)
+            .attr("width", 29)
+            .attr("height", d => innerHeight - y(d.value2) - 2)
+            .attr("fill", "url(#diagonalHatch)")
+            .attr("stroke", "black");
+
+        bounds_bar.selectAll(".bar")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => x(new Date(d.date)))
+            .attr("y", d => y(d.value))
+            .attr("width", 31)
+            .attr("height", d => innerHeight - y(d.value))
+            .attr("fill", "black");
+
+        // Add labels
+        bounds_bar.append("text")
+            .attr("x", 775)
+            .attr("y", 70)
+            .attr("class", "labels")
+            .text("Excess");
+
+        bounds_bar.append("text")
+            .attr("x", 775)
+            .attr("y", 290)
+            .attr("class", "labels")
+            .text("At white")
+            .append("tspan")
+            .attr("x", 775)
+            .attr("dy", "1.2em")
+            .text("rates");
+    </script>
+</body>
+
+</html>
