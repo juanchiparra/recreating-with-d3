@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a area chart</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="area-chart.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+	<body>
+		<main>
+			<section class="header">
+				<a href="../../index.html" class="back">
+					<span>← Back</span>
+				</a>
+				<h1>Recreating a area chart</h1>
+				<span class="date">February 05, 2025</span>
+			</section>
+			<section class="introduction">
+				<p>
+					This week I recreated a area chart from The <a
+						href="https://www.nytimes.com/interactive/2017/06/01/climate/us-biggest-carbon-polluter-in-history-will-it-walk-away-from-the-paris-climate-deal.html"
+						class="external" ;>New York Times</a> on the United States and its carbon pollution.
+					Justin Gillis and Nadja Popovich participated in its creation.
+				</p>
+				<span>Warning: Data may be inaccurate compared to the source.</span>
+			</section>
+			<section class="visualization">
+				<h2>Recreation</h2>
+				<div class="chart-container">
+					<div id="container1"></div>
+					<div id="container2"></div>
+					<div id="container3"></div>
+					<div id="container4"></div>
+					<div id="container5"></div>
+					<div id="container6"></div>
+				</div>
+			</section>
+			<section class="legend">
+				<div class="legends">
+					<div>
+						<svg width="35" height="15">
+							<rect width="35" height="15" fill="#7db5cb"></rect>
+						</svg>
+						<span>Developed economies</span>
+					</div>
+					<div>
+						<svg width="35" height="15">
+							<rect width="35" height="15" fill="#f5a15b"></rect>
+						</svg>
+						<span>Other countries</span>
+					</div>
+				</div>
+			</section>
+			</div>
+			<section class="conclusion">
+				<h3>Highlights</h3>
+				<p>
+					This is the first area chart of this year, one that represents a challenge. I wasn't entirely happy
+					with the result, but the goal was achieved, and most importantly, there was a lot of learning.
+				</p>
+				<ul>
+					<li>
+						It's one of the first recreations I think of: they don't look much alike. The reason is the
+						data. When I have access to the data, I use it, when I can replicate it, I do it, but in this
+						recreation, I had to add year by year, and being more than 164 years I had to do and do it six
+						times for each graph, I chose to simplify the data.
+					</li>
+					<li>
+						It's one of the first recreations where I created several charts using <b>forEach()</b> and
+						customizing them using the index of each one. Beyond the data and the base structure, each chart
+						has different elements and I used conditional logic to make what I wanted to appear or
+						disappear.
+					</li>
+				</ul>
+			</section>
+		</main>
+		<script type="module">
+			// Access data
+			import { data } from './area-chart.js';
+
+			// Create chart dimensions
+			const width = 300;
+			const height = 200;
+			const margin = {
+				top: 50,
+				right: 18,
+				bottom: 26,
+				left: 18
+			}
+
+			const innerWidth = width - margin.left - margin.right;
+			const innerHeight = height - margin.top - margin.bottom;
+
+			const countries = [...new Set(data.map(d => d.country))];
+			const containers = ['container1', 'container2', 'container3', 'container4', 'container5', 'container6'];
+
+			countries.forEach((country, index) => {
+				const countryData = data.filter(d => d.country === country);
+				const containerId = containers[index];
+
+				// Draw canvas
+				const wrapper_line_chart = d3.select(`#${containerId}`)
+					.append("svg")
+					.attr("viewBox", `0 0 ${width} ${height}`)
+					.attr("preserveAspectRatio", "xMidYMid meet")
+					.attr("class", "chart");
+
+				const bounds_line_chart = wrapper_line_chart.append("g")
+					.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+				// Create scales
+				const x = d3.scaleLinear()
+					.domain([1850, 2014])
+					.range([0, innerWidth]);
+
+				bounds_line_chart.append("g")
+					.attr("transform", `translate(0,${innerHeight})`)
+					.attr("class", "axis-x")
+					.call(d3.axisBottom(x).tickFormat(d3.format("d")).tickValues([1850, 2014]))
+					.selectAll("text")
+					.attr("text-anchor", (d, i) => i === 0 ? "start" : "end");
+
+				const y = d3.scaleLinear()
+					.domain([0, 8])
+					.range([innerHeight, 0]);
+
+				const yAxis = d3.axisLeft(y)
+					.tickValues([4, 8])
+					.tickFormat(d => {
+						if (index !== 0 && index !== 3) {
+							return "";
+						}
+						if (d === 8) {
+							return "8 billion metric tons CO\u2082";
+						}
+						return d;
+					});
+
+				bounds_line_chart.append("g")
+					.attr("class", "axis-y")
+					.call(yAxis)
+					.selectAll(".tick text")
+					.attr("dx", "0.6em")
+					.attr("dy", "-0.2em");
+
+				// Draw gridlines
+				const yAxisGrid = d3.axisLeft(y)
+					.tickSize(-innerWidth)
+					.tickFormat('')
+					.ticks(5);
+
+				const grid = bounds_line_chart.append('g')
+					.attr('class', 'grid')
+					.call(yAxisGrid);
+
+				grid.selectAll('.tick:first-of-type line')
+					.style("stroke", "lightgrey")
+					.style("stroke-dasharray", "none");
+
+
+				// Draw data
+				const areaBackground = d3.area()
+					.x(d => x(d.year))
+					.y0(y(0))
+					.y1(d => y(d.anotherValue));
+
+				bounds_line_chart.append("path")
+					.datum(countryData)
+					.attr("class", "area-background")
+					.attr("d", areaBackground)
+					.attr("fill", "#d9d9d9");
+
+				const area = d3.area()
+					.x(d => x(d.year))
+					.y0(y(0))
+					.y1(d => y(d.value));
+
+				bounds_line_chart.append("path")
+					.datum(countryData)
+					.attr("class", "area")
+					.attr("d", area)
+					.attr("fill", d => (country === 'United States' || country === 'European Union' || country === '7 other developed countries') ? "#7db5cb" : "#f5a15b");
+
+				// Add labels
+				bounds_line_chart.append("text")
+					.attr("x", innerWidth / 2)
+					.attr("y", -30)
+					.attr("text-anchor", "middle")
+					.attr("class", "chart-title")
+					.text(`${country}`);
+
+				if (index === 1) {
+					bounds_line_chart.append("text")
+						.attr("x", 0)
+						.attr("y", y(8.15))
+						.attr("text-anchor", "start")
+						.attr("class", "countries-label")
+						.text("28 countries including")
+						.append("tspan")
+						.attr("x", 0)
+						.attr("dy", "1.2em")
+						.text("Britain");
+				}
+
+				if (index === 2) {
+					bounds_line_chart.append("text")
+						.attr("x", 0)
+						.attr("y", y(8.15))
+						.attr("text-anchor", "start")
+						.attr("class", "countries-label")
+						.text("Australia, Canada,")
+						.append("tspan")
+						.attr("x", 0)
+						.attr("dy", "1.2em")
+						.text("Iceland, Japan, New")
+						.append("tspan")
+						.attr("x", 0)
+						.attr("dy", "1.2em")
+						.text("Zealand, Norway,")
+						.append("tspan")
+						.attr("x", 0)
+						.attr("dy", "1.2em")
+						.text("Switzerland");
+				}
+
+				if (index === 5) {
+					bounds_line_chart.append("text")
+						.attr("x", 0)
+						.attr("y", y(8.15))
+						.attr("text-anchor", "start")
+						.attr("class", "countries-label")
+						.text("Including Russia,")
+						.append("tspan")
+						.attr("x", 0)
+						.attr("dy", "1.2em")
+						.text("U.S.S.R., Brazil,")
+						.append("tspan")
+						.attr("x", 0)
+						.attr("dy", "1.2em")
+						.text("Saudi Arabia, and")
+						.append("tspan")
+						.attr("x", 0)
+						.attr("dy", "1.2em")
+						.text("more than 100 others");
+				}
+
+				if (index === 1 || index === 2 || index === 3 || index === 4 || index === 5) {
+					bounds_line_chart.append("text")
+						.attr("x", width / 2)
+						.attr("y", y(4.2))
+						.attr("text-anchor", "middle")
+						.attr("class", "us-label")
+						.attr("fill", "#cdcccb")
+						.text("U.S.");
+
+					bounds_line_chart.append("line")
+						.attr("x1", width / 2)
+						.attr("y1", y(4.1) + 5)
+						.attr("x2", width / 2)
+						.attr("y2", y(2.7))
+						.attr("stroke", "#cdcccb")
+						.attr("stroke-width", 0.6);
+				}
+
+			});
+
+		</script>
+	</body>
+
+</html>
