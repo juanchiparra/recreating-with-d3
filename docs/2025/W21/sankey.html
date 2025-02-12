@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a sankey diagram</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="sankey.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a sankey diagram</h1>
+			<span class="date">February 12, 2025</span>
+		</section>
+		<section class="introduction">
+			<p>
+				This week I recreated a sankey diagram from <a
+					href="https://www.lanacion.com.ar/economia/mejora-la-conectividad-del-interior-del-pais-con-el-exterior-pero-aun-esta-lejos-de-los-numeros-de-nid30012025#ln-info-responsive-616"
+					class="external" ;>La Nación</a> on the flow of international flights from Argentina. Gus
+				Wezerek participated in its creation.
+			</p>
+			<span>Warning: Data may be inaccurate compared to the source.</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1" class="container">
+			</div>
+		</section>
+		</div>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				This is the first sankey diagram I've done with D3 and I'm happy with the result. It was much easier
+				than I expected and as always, the official documentation helped me.
+			</p>
+			<ul>
+				<li>
+					<b>The big protagonist:</b> <a href="https://observablehq.com/@d3/sankey-component" class="external"
+						;>d3-sankey</a>. It reminds me of the first time I used
+					<a href="https://d3js.org/d3-hierarchy" class="external" ;>d3-hierarchy</a>, they have a
+					similar structure and it was easy to implement it. <b>d3-sankey</b> does all the work and it's enough to
+					follow the documentation. I find it strange that it's not included in the core of D3.
+				</li>
+			</ul>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data } from './sankey.js';
+
+		// Add formatting
+		function formatData(num) {
+			return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+		}
+
+		// Create chart dimensions
+		const width = 900;
+		const height = 500;
+		const margin = { top: 32, right: 112, bottom: 20, left: 112 };
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+		// Draw canvas
+		const wrapper_sankey = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", `0 0 ${width} ${height}`)
+			.attr("preserveAspectRatio", "xMidYMid meet")
+			.attr("class", "chart");
+
+		const bounds_sankey = wrapper_sankey.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		// Create scales
+		const color = d3.scaleOrdinal()
+			.domain(["CABA", "Buenos Aires", "Resto", "A. del Sur", "Europa", "A. del Norte", "A. Central y Caribe", "África"])
+			.range(["#448044", "#3f7740", "#8ac291", "#9c1c1c", "#c32122", "#e56767", "#f0a8a8", "#f8d4d4"]);
+
+		// Generate nodes and links
+		const nodes = [];
+		const links = [];
+
+		data.forEach(d => {
+			if (!nodes.some(n => n.name === d.category1)) {
+				nodes.push({ name: d.category1 });
+			}
+			if (!nodes.some(n => n.name === d.category2)) {
+				nodes.push({ name: d.category2 });
+			}
+			links.push({
+				source: nodes.findIndex(n => n.name === d.category1),
+				target: nodes.findIndex(n => n.name === d.category2),
+				value: d.value
+			});
+		});
+
+		const sankey = d3.sankey()
+			.nodeWidth(10)
+			.nodePadding(20)
+			.extent([[1, 1], [innerWidth - 0, innerHeight - 0]]);
+
+		const { nodes: sankeyNodes, links: sankeyLinks } = sankey({
+			nodes: nodes.map(d => Object.assign({}, d)),
+			links: links.map(d => Object.assign({}, d))
+		});
+
+		// Calculate values
+		const sumValues = {};
+		links.forEach(link => {
+			const sourceName = sankeyNodes[link.source].name;
+			const targetName = sankeyNodes[link.target].name;
+			if (!sumValues[sourceName]) {
+				sumValues[sourceName] = 0;
+			}
+			if (!sumValues[targetName]) {
+				sumValues[targetName] = 0;
+			}
+			sumValues[sourceName] += link.value;
+			sumValues[targetName] += link.value;
+		});
+
+		// Draw data
+		bounds_sankey.append("g")
+			.selectAll("rect")
+			.data(sankeyNodes)
+			.enter().append("rect")
+			.attr("x", d => d.x0)
+			.attr("y", d => d.y0)
+			.attr("height", d => d.y1 - d.y0)
+			.attr("width", d => d.x1 - d.x0)
+			.attr("fill", d => color(d.name))
+			.attr("stroke", "none");
+
+		bounds_sankey.append("g")
+			.attr("fill", "none")
+			.selectAll("path")
+			.data(sankeyLinks)
+			.enter().append("path")
+			.attr("d", d3.sankeyLinkHorizontal())
+			.attr("stroke", "grey")
+			.attr("stroke-width", d => Math.max(1, d.width))
+			.attr("stroke-opacity", 0.1);
+
+		// Add labels
+		bounds_sankey.append("g")
+			.selectAll("text")
+			.data(sankeyNodes)
+			.enter().append("text")
+			.attr("x", d => d.x0 < innerWidth / 2 ? d.x0 - 6 : d.x1 + 6)
+			.attr("y", d => (d.y1 + d.y0) / 2)
+			.attr("dy", "0.35em")
+			.attr("text-anchor", d => d.x0 < innerWidth / 2 ? "end" : "start")
+			.each(function (d) {
+				const text = d3.select(this);
+				text.append("tspan")
+					.attr("class", "airport")
+					.attr("x", d.x0 < innerWidth / 2 ? d.x0 - 6 : d.x1 + 6)
+					.attr("dy", "-0.2em")
+					.text(d.name);
+				text.append("tspan")
+					.attr("class", "count")
+					.attr("x", d.x0 < innerWidth / 2 ? d.x0 - 6 : d.x1 + 6)
+					.attr("dy", "1.2em")
+					.text(`${formatData(sumValues[d.name] || 0)} vuelos`);
+			});
+
+		bounds_sankey.append("text")
+			.attr("x", sankeyNodes[0].x0 + 5)
+			.attr("y", -18)
+			.attr("text-anchor", "middle")
+			.attr("font-weight", "400")
+			.text("Origen");
+
+		bounds_sankey.append("polygon")
+			.attr("points", `${sankeyNodes[0].x0},-10 ${sankeyNodes[0].x0 + 10},-10 ${sankeyNodes[0].x0 + 5},-5`)
+			.attr("fill", "black");
+
+		bounds_sankey.append("text")
+			.attr("x", sankeyNodes[1].x0 + 5)
+			.attr("y", -15)
+			.attr("text-anchor", "middle")
+			.attr("font-weight", "400")
+			.text("Destino");
+
+		bounds_sankey.append("polygon")
+			.attr("points", `${sankeyNodes[1].x0},-10 ${sankeyNodes[1].x0 + 10},-10 ${sankeyNodes[1].x0 + 5},-5`)
+			.attr("fill", "black");
+	</script>
+</body>
+
+</html>
