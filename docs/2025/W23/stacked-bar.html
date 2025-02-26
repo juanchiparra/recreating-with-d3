@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <title>Recreating a stacked bar chart</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link href="stacked-bar.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <main>
+        <section class="header">
+            <a href="../../index.html" class="back">
+                <span>← Back</span>
+            </a>
+            <h1>Recreating a stacked bar chart</h1>
+            <span class="date">February 26, 2025</span>
+        </section>
+        <section class="introduction">
+            <p>
+                This week I recreated a stacked bar chart from <a
+                    href="https://www.bloomberg.com/news/features/2025-02-14/a-record-year-in-women-s-sports-push-players-to-seek-better-pay/"
+                    class="external" ;>Bloomberg</a> on WNBA revenues in the United States. Jennah Haque and Vanessa
+                Perdomo participated in its creation.
+            </p>
+            <span>Warning: Data may be inaccurate compared to the source.</span>
+        </section>
+        <section class="visualization">
+            <h2>Recreation</h2>
+            <div id="container1" class="container">
+            </div>
+        </section>
+        </div>
+        <section class="conclusion">
+            <h3>Highlights</h3>
+            <p>
+                Another stacked bar chart for the challenge, at least that's what I think. I'm not convinced about this
+                chart being considered a stacked bar, but that's how I considered it in the end. I always enjoy
+                recreating Bloomberg visualizations, they always have something creative or unique about them.
+            </p>
+            <ul>
+                <li>
+                    I can already say that I feel very comfortable creating curved arrows with SVG. I remember that in
+                    the first recreation I had, it was quite a challenge, but now I find it very easy. Like everything,
+                    it is a matter of reading the documentation and trying to understand it.
+                </li>
+                <li>
+                    I know we will always have a thousand and one ways to achieve the same result, but I would love to
+                    know which is the “right” one. Although it looks like only one chart, there are really three: one
+                    with the white bars and the black border, then the one with the pattern, and finally the one with
+                    the orange bars. That's what worked for me.
+                </li>
+            </ul>
+        </section>
+    </main>
+    <script type="module">
+        // Access data
+        import { data } from './stacked-bar.js';
+
+        // Create chart dimensions
+        const width = 900;
+        const height = 600;
+        const margin = { top: 80, right: 60, bottom: 80, left: 60 };
+
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+
+        // Draw canvas
+        const wrapper_bar = d3.select("#container1")
+            .append("svg")
+            .attr("viewBox", "0 0 900 600")
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        const bounds_bar = wrapper_bar.append("g")
+            .style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+        // Define diagonal pattern
+        const defs = wrapper_bar.append("defs");
+
+        defs.append("pattern")
+            .attr("id", "diagonalHatch")
+            .attr("patternUnits", "userSpaceOnUse")
+            .attr("width", 10)
+            .attr("height", 10)
+            .append("rect")
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", "white");
+
+        defs.select("#diagonalHatch")
+            .append("path")
+            .attr("d", "M10,0 l-10,10 M15,5 l-10,10 M5,-5 l-10,10")
+            .attr("stroke", "black")
+            .attr("stroke-width", 0.9);
+
+        // Define arrow marker
+        defs.append("marker")
+            .attr("id", "arrow")
+            .attr("viewBox", "0 0 10 10")
+            .attr("refX", "5")
+            .attr("refY", "5")
+            .attr("markerWidth", "6")
+            .attr("markerHeight", "6")
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M 0 0 L 8 5 L 0 10 z")
+            .attr("fill", "#222222");
+
+        // Create scales
+        const x = d3.scaleBand()
+            .domain(data.map(d => new Date(d.date)))
+            .range([0, innerWidth])
+            .padding(0.2);
+
+        const y = d3.scaleLinear()
+            .domain([0, 160])
+            .nice()
+            .range([innerHeight, 0]);
+
+        // Draw peripherals
+        bounds_bar.append("g")
+            .attr("class", "x-axis")
+            .attr("transform", `translate(6,${innerHeight + 6})`)
+            .call(d3.axisBottom(x).tickFormat(d => {
+                if (d3.timeFormat("%Y")(d) === "2019") {
+                    return "FY2019\nbaseline";
+                }
+                return d3.timeFormat("%Y")(d);
+            }).tickPadding(8).tickSize(6))
+            .selectAll(".domain")
+            .remove();
+
+        bounds_bar.selectAll(".x-axis .tick text")
+            .each(function (d) {
+                if (d3.timeFormat("%Y")(d) === "2019") {
+                    const self = d3.select(this);
+                    const lines = self.text().split('\n');
+                    self.text('');
+                    self.append('tspan').attr('x', 0).attr('dy', '0.75em').text(lines[0]);
+                    self.append('tspan').attr('x', 0).attr('dy', '1.2em').attr('fill', 'grey').text(lines[1]);
+                }
+            });
+
+        bounds_bar.append("g")
+            .attr("class", "y-axis")
+            .attr("transform", `translate(${innerWidth - 36},-2)`)
+            .call(d3.axisRight(y).tickValues([0, 80, 160]).tickFormat(d => d === 160 ? "$160M" : d).tickPadding(20).tickSize(32))
+            .selectAll(".domain")
+            .remove();
+
+        bounds_bar.selectAll(".y-axis .tick text")
+            .attr("dx", "-20")
+            .attr("dy", "-4")
+            .style("text-anchor", "end");
+
+        bounds_bar.selectAll(".y-axis .tick line")
+            .filter(d => d === 0)
+            .remove();
+
+        // Draw data
+        bounds_bar.selectAll(".bar-orange")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar-orange")
+            .attr("x", d => x(new Date(d.date)) + x.bandwidth() / 2 - 15)
+            .attr("y", d => y(d.value2))
+            .attr("width", 44)
+            .attr("height", d => innerHeight - y(d.value2))
+            .attr("fill", "#ff6200");
+
+        bounds_bar.selectAll(".bar-border")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar-border")
+            .attr("x", d => x(new Date(d.date)) + x.bandwidth() / 2 - 15)
+            .attr("y", d => y(d.value))
+            .attr("width", 44)
+            .attr("height", d => innerHeight - y(d.value))
+            .attr("fill", "transparent")
+            .attr("stroke", "#222222")
+            .attr("stroke-width", 1.1);
+
+        bounds_bar.selectAll(".bar-pattern")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar-pattern")
+            .attr("x", d => x(new Date(d.date)) + x.bandwidth() / 2 - 15)
+            .attr("y", d => y(d.value) - (innerHeight - y(d.value3) - 10))
+            .attr("width", 44)
+            .attr("height", d => innerHeight - y(d.value3) - 2)
+            .attr("fill", "url(#diagonalHatch)")
+            .attr("stroke", "#222222");
+
+        // Add base line
+        bounds_bar.append("line")
+            .attr("x1", 0)
+            .attr("y1", innerHeight)
+            .attr("x2", innerWidth)
+            .attr("y2", innerHeight)
+            .attr("stroke", "#222222")
+            .attr("stroke-width", 1.1);
+
+        // Add arrow
+        bounds_bar.append("path")
+            .attr("d", "M205,275 C190,180 290,150 334,220")
+            .attr("stroke", "#222222")
+            .attr("stroke-width", 1.6)
+            .attr("fill", "none")
+            .attr("marker-end", "url(#arrow)");
+
+        // Add labels
+        bounds_bar.append("text")
+            .attr("x", 200)
+            .attr("y", 130)
+            .attr("class", "labels")
+            .text("Gap added")
+            .append("tspan")
+            .attr("x", 200)
+            .attr("dy", "1.2em")
+            .text("to next year's")
+            .append("tspan")
+            .attr("x", 200)
+            .attr("dy", "1.2em")
+            .text("target");
+
+        // Add legend
+        const legend = bounds_bar.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(0, -16)`);
+
+        legend.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", "white")
+            .attr("stroke", "black");
+
+        legend.append("text")
+            .attr("x", 16)
+            .attr("y", 10)
+            .attr("font-size", "14")
+            .attr("font-weight", "500")
+            .text("Target");
+
+        legend.append("rect")
+            .attr("x", 80)
+            .attr("y", 0)
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", "#ff6200");
+
+        legend.append("text")
+            .attr("x", 96)
+            .attr("y", 10)
+            .attr("font-size", "14")
+            .attr("font-weight", "500")
+            .text("Actual");
+    </script>
+</body>
+
+</html>
