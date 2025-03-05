@@ -29,5 +29,7 @@ It's a personal challenge to keep learning: https://juanchiparra.github.io/recre
 | W20  | [New York Times](https://www.nytimes.com/interactive/2017/06/01/climate/us-biggest-carbon-polluter-in-history-will-it-walk-away-from-the-paris-climate-deal.html) | [2025/W20](/docs/2025/W20/area-chart.html) | [Area chart](https://juanchiparra.github.io/recreating-with-d3/2025/W20/area-chart.html) |
 | W21  | [La Nación](https://www.lanacion.com.ar/economia/mejora-la-conectividad-del-interior-del-pais-con-el-exterior-pero-aun-esta-lejos-de-los-numeros-de-nid30012025/#ln-info-responsive-616) | [2025/W21](/docs/2025/W21/sankey.html) | [Sankey diagram](https://juanchiparra.github.io/recreating-with-d3/2025/W21/sankey.html) |
 | W22  | [San Francisco Chronicle](https://www.sfchronicle.com/sf/article/mayor-lurie-policy-director-20049832.php) | [2025/W22](/docs/2025/W22/voronoi-treemap.html) | [Voronoi treemap](https://juanchiparra.github.io/recreating-with-d3/2025/W22/voronoi-treemap.html) |
-| W23  | [Bloomberg](https://juanchiparra.github.io/recreating-with-d3/2025/W23/stacked-bar.html) | [2025/W23](/docs/2025/W23/stacked-bar.html) | [Stacked bar chart](https://juanchiparra.github.io/recreating-with-d3/2025/W23/stacked-bar.html) |
+| W23  | [Bloomberg](https://www.bloomberg.com/news/features/2025-02-14/a-record-year-in-women-s-sports-push-players-to-seek-better-pay) | [2025/W23](/docs/2025/W23/stacked-bar.html) | [Stacked bar chart](https://juanchiparra.github.io/recreating-with-d3/2025/W23/stacked-bar.html) |
+| W24  | [Die Tageszeitung](https://taz.de/Schwierige-Koalition-in-Sicht/!6068311/) | [2025/W24](/docs/2025/W24/donut-chart.html) | [Donut chart](https://juanchiparra.github.io/recreating-with-d3/2025/W24/donut-chart.html) |
+
 
