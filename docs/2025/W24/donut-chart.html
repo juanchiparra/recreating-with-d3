@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <title>Recreating a donut chart</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link href="donut-chart.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <main>
+        <section class="header">
+            <a href="../../index.html" class="back">
+                <span>← Back</span>
+            </a>
+            <h1>Recreating a donut chart</h1>
+            <span class="date">March 05, 2025</span>
+        </section>
+        <section class="introduction">
+            <p>
+                This week I recreated a donut chart from <a
+                    href="https://taz.de/Schwierige-Koalition-in-Sicht/!6068311/" class="external">Die Tageszeitung</a>
+                on the possible scenarios of the German federal election.
+            </p>
+            <span>Warning: Data may be inaccurate compared to the source.</span>
+        </section>
+        <section class="visualization">
+            <h2>Recreation</h2>
+            <div id="container1" class="container">
+            </div>
+            <div id="buttons">
+                <p>Wählen Sie Parteien für eine Koalition aus:</p>
+                <div data-name="SPD" style="background-color: #f44647; border-color: #f44647;" class="button selected">
+                    <div class="data-value">
+                        45
+                        <span class="close-btn" style="background-color: #f44647;">X</span>
+                    </div>
+                    <div class="data-name">SPD</div>
+                </div>
+                <div data-name="CDU" style="background-color: #333333; border-color: #333333;"
+                    class="button deselected">
+                    <div class="data-value">
+                        26
+                        <span class="close-btn" style="display: none; background-color: #333333;">X</span>
+                    </div>
+                    <div class="data-name">CDU</div>
+                </div>
+                <div data-name="Grüne" style="background-color: #46962b; border-color: #46962b;"
+                    class="button selected">
+                    <div class="data-value">
+                        25
+                        <span class="close-btn" style="background-color: #46962b;">X</span>
+                    </div>
+                    <div class="data-name">Grüne</div>
+                </div>
+                <div data-name="Linke" style="background-color: #c72767; border-color: #c72767;"
+                    class="button deselected">
+                    <div class="data-value">
+                        15
+                        <span class="close-btn" style="display: none; background-color: #c72767;">X</span>
+                    </div>
+                    <div class="data-name">Linke</div>
+                </div>
+                <div data-name="AfD" style="background-color: #8b4513; border-color: #8b4513;"
+                    class="button deselected">
+                    <div class="data-value">
+                        10
+                        <span class="close-btn" style="display: none; background-color: #8b4513;">X</span>
+                    </div>
+                    <div class="data-name">AfD</div>
+                </div>
+            </div>
+        </section>
+        <section class="conclusion">
+            <h3>Highlights</h3>
+            <p>
+                This is the first donut chart of the challenge. I'm very happy with the final result. It was a
+                complicated recreation, with some obstacles that I was able to overcome. I'm very proud of what I have
+                achieved.
+            </p>
+            <ul>
+                <li>
+                    I liked getting a visualization of another German newspaper, this is the second one. Sometimes I
+                    tend to fall a lot into the media I know or the most popular ones, but I like to be able to
+                    diversify and get to know new newspapers.
+                </li>
+                <li>
+                    There are some minor issues with the chart update and <b>mouse-over</b> that I decided to overlook, I
+                    also completely ignored the mobile version. Since this is a personal challenge, I think it's acceptable 
+                    not to aim for absolute "perfection". 
+                </li>
+                <li>
+                    In the future, I want to create visualizations that prioritize accessibility and inclusivity, taking
+                    into account the diverse needs of users. Recreating visualizations helps me understand what works
+                    and what doesn't, allowing me to redefine my style. If you're interested in accessibility in data
+                    visualization, I recommend checking out <a href="https://fossheim.io/" class="external">Sarah
+                        Fossheim's portfolio</a>. Her <a
+                        href="https://fossheim.io/writing/posts/2024-dataviz-a11y-elections/" class="external">latest
+                        article</a> on the topic
+                    is very insightful.
+                    is very insightful.
+
+                </li>
+            </ul>
+        </section>
+    </main>
+    <script type="module">
+        import { data } from './donut-chart.js';
+        const innerRadius = 120, outerRadius = 300;
+
+        const width = 700, height = 610, margin = { top: 0, right: 0, bottom: 0, left: 0 };
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+
+        const svg = d3.select("#container1").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const bounds = svg.append("g")
+            .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+        const pie = d3.pie()
+            .startAngle(-Math.PI / 2)
+            .endAngle(Math.PI / 2)
+            .padAngle(0.004)
+            .sort(null);
+
+        const arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius);
+
+        const color = d3.scaleOrdinal()
+            .domain(data.map(d => d.name))
+            .range(data.map(d => d.color));
+
+        let selectedData = data.filter(d => d.name === "SPD" || d.name === "Grüne").map(d => d.name);
+
+        let sortedData;
+
+        function updateChart() {
+            const filteredData = data.map(d => ({
+                ...d,
+                value: selectedData.includes(d.name) ? d.value : d.value,
+                color: selectedData.includes(d.name) ? color(d.name) : "#d3d3d3"
+            }));
+
+            sortedData = filteredData.sort((a, b) => {
+                if (selectedData.includes(a.name) && !selectedData.includes(b.name)) return -1;
+                if (!selectedData.includes(a.name) && selectedData.includes(b.name)) return 1;
+                return b.value - a.value;
+            });
+
+            const arcs = bounds.selectAll("path")
+                .data(pie(sortedData.map(d => d.value)));
+
+            arcs.join("path")
+                .attr("d", arc)
+                .attr("fill", (d, i) => sortedData[i].color);
+        }
+
+        d3.selectAll("#buttons .button").on("click", function () {
+            const name = d3.select(this).attr("data-name");
+            const span = d3.select(this).select(".close-btn");
+            if (selectedData.includes(name)) {
+                selectedData = selectedData.filter(d => d !== name);
+                d3.select(this).classed("selected", false).classed("deselected", true)
+                    .style("background-color", "#d3d3d3")
+                    .style("border-color", "#d3d3d3");
+                span.style("display", "none");
+            } else {
+                selectedData.push(name);
+                d3.select(this).classed("selected", true).classed("deselected", false)
+                    .style("background-color", color(name))
+                    .style("border-color", color(name));
+                span.style("display", "flex");
+            }
+            updateChart();
+        });
+
+        // Inicializar los botones con los estilos correctos
+        d3.selectAll("#buttons .button").each(function () {
+            const name = d3.select(this).attr("data-name");
+            const span = d3.select(this).select(".close-btn");
+            if (selectedData.includes(name)) {
+                d3.select(this).classed("selected", true).classed("deselected", false)
+                    .style("background-color", color(name))
+                    .style("border-color", color(name));
+                span.style("display", "flex");
+            } else {
+                d3.select(this).classed("selected", false).classed("deselected", true)
+                    .style("background-color", "#d3d3d3")
+                    .style("border-color", "#d3d3d3");
+                span.style("display", "none");
+            }
+        });
+        d3.selectAll("#buttons .button").on("mouseover", function () {
+            const name = d3.select(this).attr("data-name");
+            bounds.selectAll("path")
+                .filter((d, i) => sortedData[i].name === name)
+                .transition()
+                .duration(200)
+                .attr("d", d3.arc().innerRadius(innerRadius).outerRadius(outerRadius + 4));
+        }).on("mouseout", function () {
+            bounds.selectAll("path")
+                .transition()
+                .duration(200)
+                .attr("d", arc);
+        });
+
+        updateChart();
+
+        // Add vertical line
+        bounds.append("line")
+            .attr("x1", 0)
+            .attr("y1", -outerRadius - 4)
+            .attr("x2", 0)
+            .attr("y2", -innerRadius + 4)
+            .attr("stroke", "gray")
+            .attr("stroke-width", 1);
+
+        // Add label
+        bounds.append("text")
+            .attr("x", 0)
+            .attr("y", -innerRadius + 70)
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.35em")
+            .attr("font-size", "14px")
+            .attr("fill", "grey")
+            .text("Gesamtsitze")
+            .append("tspan")
+            .attr("x", 0)
+            .attr("dy", "1.2em")
+            .text("121");
+    </script>
+</body>
+
+</html>
