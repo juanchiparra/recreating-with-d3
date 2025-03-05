@@ -88,9 +88,11 @@
                     diversify and get to know new newspapers.
                 </li>
                 <li>
-                    There are some minor issues with the chart update and <b>mouse-over</b> that I decided to overlook, I
-                    also completely ignored the mobile version. Since this is a personal challenge, I think it's acceptable 
-                    not to aim for absolute "perfection". 
+                    There are some minor issues with the chart update and <b>mouse-over</b> that I decided to overlook,
+                    I
+                    also completely ignored the mobile version. Since this is a personal challenge, I think it's
+                    acceptable
+                    not to aim for absolute "perfection".
                 </li>
                 <li>
                     In the future, I want to create visualizations that prioritize accessibility and inclusivity, taking
@@ -108,26 +110,31 @@
         </section>
     </main>
     <script type="module">
+        // Access data
         import { data } from './donut-chart.js';
-        const innerRadius = 120, outerRadius = 300;
 
+        // Create chart dimensions
         const width = 700, height = 610, margin = { top: 0, right: 0, bottom: 0, left: 0 };
         const innerWidth = width - margin.left - margin.right;
         const innerHeight = height - margin.top - margin.bottom;
+        const innerRadius = 120, outerRadius = 300;
 
-        const svg = d3.select("#container1").append("svg")
+        // Draw canvas
+        const wrapper_donut = d3.select("#container1").append("svg")
             .attr("width", width)
             .attr("height", height);
 
-        const bounds = svg.append("g")
+        const bounds_donut = wrapper_donut.append("g")
             .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
+        // Create scales
         const pie = d3.pie()
             .startAngle(-Math.PI / 2)
             .endAngle(Math.PI / 2)
             .padAngle(0.004)
             .sort(null);
 
+        // Draw data
         const arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius);
 
         const color = d3.scaleOrdinal()
@@ -137,6 +144,7 @@
         let selectedData = data.filter(d => d.name === "SPD" || d.name === "Grüne").map(d => d.name);
 
         let sortedData;
+
 
         function updateChart() {
             const filteredData = data.map(d => ({
@@ -151,7 +159,7 @@
                 return b.value - a.value;
             });
 
-            const arcs = bounds.selectAll("path")
+            const arcs = bounds_donut.selectAll("path")
                 .data(pie(sortedData.map(d => d.value)));
 
             arcs.join("path")
@@ -178,7 +186,6 @@
             updateChart();
         });
 
-        // Inicializar los botones con los estilos correctos
         d3.selectAll("#buttons .button").each(function () {
             const name = d3.select(this).attr("data-name");
             const span = d3.select(this).select(".close-btn");
@@ -196,13 +203,13 @@
         });
         d3.selectAll("#buttons .button").on("mouseover", function () {
             const name = d3.select(this).attr("data-name");
-            bounds.selectAll("path")
+            bounds_donut.selectAll("path")
                 .filter((d, i) => sortedData[i].name === name)
                 .transition()
                 .duration(200)
                 .attr("d", d3.arc().innerRadius(innerRadius).outerRadius(outerRadius + 4));
         }).on("mouseout", function () {
-            bounds.selectAll("path")
+            bounds_donut.selectAll("path")
                 .transition()
                 .duration(200)
                 .attr("d", arc);
@@ -210,8 +217,8 @@
 
         updateChart();
 
-        // Add vertical line
-        bounds.append("line")
+        // Add labels
+        bounds_donut.append("line")
             .attr("x1", 0)
             .attr("y1", -outerRadius - 4)
             .attr("x2", 0)
@@ -219,8 +226,7 @@
             .attr("stroke", "gray")
             .attr("stroke-width", 1);
 
-        // Add label
-        bounds.append("text")
+        bounds_donut.append("text")
             .attr("x", 0)
             .attr("y", -innerRadius + 70)
             .attr("text-anchor", "middle")
