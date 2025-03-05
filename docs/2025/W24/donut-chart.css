@@ -1,0 +1,271 @@
+:root {
+    font-family: 'Inter', 'Avenir', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    background-color: #fdfdfd;
+    color: #232323;
+}
+
+main {
+    padding: 20px;
+}
+
+.header,
+.introduction,
+.conclusion {
+    width: 100%;
+    max-width: 650px;
+    margin: 30px auto;
+    padding: 0px auto;
+}
+
+.visualization {
+    width: 100%;
+    margin: 30px auto;
+    padding: 0px auto;
+}
+
+#container1 {
+    width: 700px;
+    height: 300px;
+    margin: 0 auto;
+}
+
+.header span {
+    display: block;
+    text-align: center;
+}
+
+.introduction span {
+    font-size: 1.1em;
+    display: block;
+    text-align: center;
+    font-style: italic;
+}
+
+h1 {
+    font-size: 3em;
+    margin-top: 40px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    font-weight: bold;
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.4em;
+    margin: 40px;
+    font-weight: bold;
+    text-align: center;
+}
+
+h3 {
+    font-size: 1em;
+}
+
+.introduction p {
+    margin-bottom: 30px;
+    font-size: 1.25em;
+    line-height: 1.5em;
+}
+
+.conclusion p {
+    margin-bottom: 30px;
+    font-size: 0.9em;
+    line-height: 1.5em;
+}
+
+.conclusion li {
+    margin-bottom: 30px;
+    font-size: 0.9em;
+    line-height: 1.5em;
+}
+
+.back {
+    text-decoration: none;
+    font-size: 16px;
+    color: #161618;
+    text-align: center;
+}
+
+.external {
+    color: #161618;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+}
+
+.external:hover {
+    text-decoration: none;
+}
+
+.button {
+    position: relative;
+    width: 140px; 
+    height: 46px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-color: inherit;
+    font-weight: 600;
+}
+
+.data-name {
+    padding: 2px;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.data-value {
+    background-color: white;
+    color: black;
+    padding: 2px;
+    text-align: center;
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    position: relative;
+}
+
+#buttons .button.deselected {
+    border-color: #d3d3d3;
+}
+
+#buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+#buttons p {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#buttons .button {
+    margin: 5px;
+}
+
+.close-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    color: white;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+
+    h2 {
+        font-size: 1.2em;
+    }
+
+    h3 {
+        font-size: 0.9em;
+    }
+
+    p {
+        font-size: 1em;
+    }
+
+    .header span {
+        font-size: 1em;
+    }
+
+    .introduction span {
+        font-size: 1em;
+    }
+
+    .introduction p {
+        font-size: 1em;
+    }
+
+    .conclusion p,
+    .conclusion li {
+        font-size: 0.8em;
+    }
+
+    .legend-text {
+        font-size: 0.8em;
+    }
+
+    .back {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5em;
+    }
+
+    h2 {
+        font-size: 1em;
+    }
+
+    h3 {
+        font-size: 0.8em;
+    }
+
+    p {
+        font-size: 0.9em;
+    }
+
+    .header span {
+        font-size: 0.9em;
+    }
+
+    .introduction span {
+        font-size: 0.9em;
+    }
+
+    .introduction p {
+        font-size: 0.9em;
+    }
+
+    .conclusion p,
+    .conclusion li {
+        font-size: 0.7em;
+    }
+
+    .legend-text {
+        font-size: 0.7em;
+    }
+
+    .back {
+        font-size: 12px;
+    }
+}
