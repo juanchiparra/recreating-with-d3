@@ -31,5 +31,6 @@ It's a personal challenge to keep learning: https://juanchiparra.github.io/recre
 | W22  | [San Francisco Chronicle](https://www.sfchronicle.com/sf/article/mayor-lurie-policy-director-20049832.php) | [2025/W22](/docs/2025/W22/voronoi-treemap.html) | [Voronoi treemap](https://juanchiparra.github.io/recreating-with-d3/2025/W22/voronoi-treemap.html) |
 | W23  | [Bloomberg](https://www.bloomberg.com/news/features/2025-02-14/a-record-year-in-women-s-sports-push-players-to-seek-better-pay) | [2025/W23](/docs/2025/W23/stacked-bar.html) | [Stacked bar chart](https://juanchiparra.github.io/recreating-with-d3/2025/W23/stacked-bar.html) |
 | W24  | [Die Tageszeitung](https://taz.de/Schwierige-Koalition-in-Sicht/!6068311/) | [2025/W24](/docs/2025/W24/donut-chart.html) | [Donut chart](https://juanchiparra.github.io/recreating-with-d3/2025/W24/donut-chart.html) |
+| W25 | [The Economist](https://www.economist.com/interactive/democracy-index-2024) | [2025/W25](/docs/2025/W25/beeswarm_plot.html) | [Beeswarm plot](https://juanchiparra.github.io/recreating-with-d3/2025/W25/beeswarm_plot.html) |
 
 
