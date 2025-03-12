@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a beeswarm plot</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="beeswarm_plot.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a beeswarm plot</h1>
+			<span class="date">January 01, 2025</span>
+		</section>
+		<section class="introduction">
+			<p>
+				This week I recreated a beeswarm plot from <a
+					href="https://www.economist.com/interactive/democracy-index-2024" class="external" ;>The
+					Economist</a>
+				on the results of the Democracy Index 2024.
+			</p>
+			<span>Warning: Data may be inaccurate compared to the source.</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="legend">
+				<div id="legend-row">
+					<div class="legend-item">
+						<span>Authoritarian<br>regime</span>
+						<div class="color-box-container">
+							<div class="color-box" style="background-color: #af1812;"></div>
+							<div class="color-box" style="background-color: #f6423c;"></div>
+							<div class="color-box" style="background-color: #fba493;"></div>
+						</div>
+					</div>
+					<div class="legend-item">
+						<span>Hybrid<br>regime</span>
+						<div class="color-box-container">
+							<div class="color-box" style="background-color: #ffbf00;"></div>
+							<div class="color-box" style="background-color: #ffe1aa;"></div>
+						</div>
+					</div>
+					<div class="legend-item">
+						<span>Flawed<br>democracy</span>
+						<div class="color-box-container">
+							<div class="color-box" style="background-color: #7697c4;"></div>
+							<div class="color-box" style="background-color: #4871a8;"></div>
+						</div>
+					</div>
+					<div class="legend-item">
+						<span>Full<br>democracy</span>
+						<div class="color-box-container">
+							<div class="color-box" style="background-color: #1f2e7a;"></div>
+							<div class="color-box" style="background-color: #1f2e7a;"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="container1" class="container"></div>
+		</section>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				This is the second beeswarm plot I redesigned during the challenge. Not much to say: Like the first
+				time, I used <b>d3.force</b> to avoid overlapping. The only tricky part was replicating the data. It's one of
+				the graphs I feel most comfortable doing.
+			</p>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data } from './beeswarm_plot.js';
+
+		// Create chart dimensions
+		const width = 1000;
+		const height = 600;
+		const margin = { top: 10, right: 20, bottom: 0, left: 20 };
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+		// Draw canvas
+		const wrapper_beeswarm_plot = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 1000 600")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		const bounds_beeswarm_plot = wrapper_beeswarm_plot.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		// Create scales
+		const x = d3.scaleLinear()
+			.domain([0, d3.max(data, d => d.value) + 0.4])
+			.range([margin.left * 7, innerWidth + margin.left]);
+
+		const y = d3.scaleBand()
+			.domain(data.map(d => d.region))
+			.range([height - margin.bottom, margin.top * 5])
+			.padding(0.05);
+
+		const colorScale = {
+			0: "#af1812",
+			1: "#af1812",
+			2: "#f6423c",
+			3: "#fba493",
+			4: "#ffbf00",
+			5: "#ffe1aa",
+			6: "#7697c4",
+			7: "#4871a8",
+			8: "#1f2e7a",
+			9: "#1f2e7a",
+			10: "#1f2e7a"
+		};
+
+		function getColor(value) {
+			const roundedValue = Math.floor(value);
+			return colorScale[roundedValue] || "#d2d2d2";
+		}
+
+		// Draw gridlines	
+		const yGrid = d3.axisLeft(y)
+			.ticks(9)
+			.tickSize(-width + margin.left + margin.right)
+			.tickFormat('')
+
+
+		bounds_beeswarm_plot.append("g")
+			.attr("class", "grid")
+			.attr("transform", `translate(0, 0)`)
+			.call(yGrid);
+
+		// Draw peripherals
+		const yAxis = d3.axisLeft(y)
+			.ticks(9)
+			.tickSize(0);
+
+		bounds_beeswarm_plot.append("g")
+			.attr("class", "axis")
+			.attr("transform", `translate(0,-65)`)
+			.call(yAxis)
+			.selectAll("text")
+			.style("font-size", "13px")
+			.style("font-weight", "600")
+			.style("text-anchor", "start");
+
+		const xAxis = d3.axisTop(x)
+			.ticks(10)
+			.tickFormat(d => d);
+
+		bounds_beeswarm_plot.append("g")
+			.attr("class", "axis")
+			.attr("transform", `translate(0,${margin.top})`)
+			.call(xAxis);
+
+		// Draw data
+		const simulation = d3.forceSimulation(data)
+			.force("x", d3.forceX(d => x(d.value)).strength(1))
+			.force("y", d3.forceY(d => y(d.region) + y.bandwidth() / 2 - 40).strength(1))
+			.force("collide", d3.forceCollide(5))
+			.stop();
+
+		for (let i = 0; i < 120; ++i) simulation.tick();
+
+		bounds_beeswarm_plot.append("g")
+			.selectAll("circle")
+			.data(data)
+			.enter().append("circle")
+			.attr("class", "dot")
+			.attr("r", 4)
+			.attr("cx", d => d.x)
+			.attr("cy", d => d.y)
+			.attr("fill", d => getColor(d.value))
+			.attr("stroke", d => d.highlighted === "Yes" ? "black" : "none")
+			.attr("stroke-width", "1px");
+
+		// Add labels
+		bounds_beeswarm_plot.append("g")
+			.selectAll("text")
+			.data(data.filter(d => d.highlighted === "Yes"))
+			.enter().append("text")
+			.attr("x", d => d.x)
+			.attr("y", d => d.y - 12)
+			.attr("text-anchor", "middle")
+			.attr("font-size", "12px")
+			.attr("fill", "black")
+			.text(d => d.country);
+	</script>
+</body>
+
+</html>
