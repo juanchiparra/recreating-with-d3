@@ -32,5 +32,6 @@ It's a personal challenge to keep learning: https://juanchiparra.github.io/recre
 | W23  | [Bloomberg](https://www.bloomberg.com/news/features/2025-02-14/a-record-year-in-women-s-sports-push-players-to-seek-better-pay) | [2025/W23](/docs/2025/W23/stacked-bar.html) | [Stacked bar chart](https://juanchiparra.github.io/recreating-with-d3/2025/W23/stacked-bar.html) |
 | W24  | [Die Tageszeitung](https://taz.de/Schwierige-Koalition-in-Sicht/!6068311/) | [2025/W24](/docs/2025/W24/donut-chart.html) | [Donut chart](https://juanchiparra.github.io/recreating-with-d3/2025/W24/donut-chart.html) |
 | W25 | [The Economist](https://www.economist.com/interactive/democracy-index-2024) | [2025/W25](/docs/2025/W25/beeswarm_plot.html) | [Beeswarm plot](https://juanchiparra.github.io/recreating-with-d3/2025/W25/beeswarm_plot.html) |
+| W26 | [New York Times](https://www.nytimes.com/interactive/2025/03/09/upshot/covid-lockdown-five-year-charts.html) | [2025/W26](/docs/2025/W26/line_chart.html) | [Beeswarm plot](https://juanchiparra.github.io/recreating-with-d3/2025/W26/line_chart.html) |
 
 
