@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a line chart</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="line_chart.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+	<body>
+		<main>
+			<section class="header">
+				<a href="../../index.html" class="back">
+					<span>← Back</span>
+				</a>
+				<h1>Recreating a line chart</h1>
+				<span class="date">March 19, 2025</span>
+			</section>
+			<section class="introduction">
+				<p>
+					This week I recreated a line chart from The <a
+						href="https://www.nytimes.com/interactive/2025/03/09/upshot/covid-lockdown-five-year-charts.html?smtyp=cur&smid=bsky-nytimes"
+						class="external" target="_blank">New York Times</a> on how Covid changed the world. Aatish
+					Bhatia and Irineo
+					Cabreros participated in its creation.
+				</p>
+				<span>Warning: Data may be inaccurate compared to the source.</span>
+			</section>
+			<section class="visualization">
+				<h2>Recreation</h2>
+				<div id="container1" class="container">
+				</div>
+			</section>
+			</div>
+			<section class="conclusion">
+				<h3>Highlights</h3>
+				<p>
+					Another line chart for the challenge. I think the most complicated thing was to recreate the data.
+					Take the opportunity to review the New York Times <a
+						href="https://www.nytimes.com/interactive/2025/03/09/upshot/covid-lockdown-five-year-charts.html?smtyp=cur&smid=bsky-nytimes"
+						class="external" target="_blank" ;>article</a>, beyond its aesthetics, the data brings a
+					lot of information and has very stunning comparisons.
+				</p>
+				<ul>
+					<li>
+						I'm impressed that a few months later, and with 26 recreations under my belt, something that was
+						very complicated before is now so simple. Although there is still a lot of room for improvement,
+						especially in terms of accessibility, I'm very happy with the result so far.
+					</li>
+				</ul>
+			</section>
+		</main>
+		<script type="module">
+			// Access data
+			import { data } from './line_chart.js';
+
+			// Add formatting
+			const parseDate = d3.timeParse("%m/%Y");
+
+			data.forEach(d => {
+				d.year = parseDate(d.year);
+			});
+
+			// Create chart dimensions
+			const width = 950;
+			const height = 455;
+			const margin = {
+				top: 60,
+				right: 60,
+				bottom: 40,
+				left: 60
+			}
+
+			const innerWidth = width - margin.left - margin.right;
+			const innerHeight = height - margin.top - margin.bottom;
+
+			// Draw canvas
+			const wrapper_line_chart = d3.select("#container1")
+				.append("svg")
+				.attr("viewBox", "0 0 950 455")
+				.attr("preserveAspectRatio", "xMidYMid meet");
+
+			// Add background
+			wrapper_line_chart.append("rect")
+				.attr("x", 0)
+				.attr("y", 0)
+				.attr("width", width / 2)
+				.attr("height", height)
+				.attr("fill", "#eeeeee");
+
+			wrapper_line_chart.append("rect")
+				.attr("x", width / 2)
+				.attr("y", 0)
+				.attr("width", width / 2)
+				.attr("height", height)
+				.attr("fill", "#fcefe9");
+
+			wrapper_line_chart.append("line")
+				.attr("x1", width / 2)
+				.attr("y1", 0)
+				.attr("x2", width / 2)
+				.attr("y2", height)
+				.attr("stroke", "white")
+				.attr("stroke-width", 1.5);
+
+			const bounds_line_chart = wrapper_line_chart.append("g")
+				.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+			// Create scales
+			const x = d3.scaleTime()
+				.domain(d3.extent(data, d => d.year))
+				.range([0, innerWidth]);
+
+			const y = d3.scaleLinear()
+				.domain([0, 475000])
+				.range([innerHeight, 0]);
+
+			bounds_line_chart.append("g")
+				.attr("transform", `translate(0,${innerHeight})`)
+				.attr("class", "axis-x")
+				.call(d3.axisBottom(x).ticks(4).tickFormat(d => {
+					const year = d3.timeFormat("%Y")(d);
+					return year === "2020" ? d3.timeFormat("March %Y")(d) : year;
+				}));
+
+			bounds_line_chart.append("g")
+				.attr("transform", `translate(10, -8)`)
+				.attr("class", "axis-y")
+				.call(d3.axisLeft(y).ticks(2).tickFormat(d => d === 0 ? "" : d === 400000 ? "400,000 per month" : d3.format(",")(d)));
+
+			// Draw gridlines
+			const yAxisGrid = d3.axisLeft(y)
+				.tickSize(-innerWidth)
+				.tickFormat('')
+				.ticks(2);
+
+			const grid = bounds_line_chart.append('g')
+				.attr('class', 'grid')
+				.attr("transform", `translate(0, 0)`)
+				.call(yAxisGrid);
+
+			grid.selectAll("line")
+				.filter((d, i) => i === 0)
+				.classed("first-line", true);
+
+			// Draw data
+			const line = d3.line()
+				.x(d => x(d.year))
+				.y(d => y(d.value));
+
+			const halfIndex = Math.floor(data.length / 2);
+
+			bounds_line_chart.append("path")
+				.datum(data.slice(0, halfIndex + 1))
+				.attr("class", "line")
+				.attr("d", line)
+				.style("stroke", "#58595b")
+				.style("stroke-width", 3);
+
+			bounds_line_chart.append("path")
+				.datum(data.slice(halfIndex))
+				.attr("class", "line")
+				.attr("d", line)
+				.style("stroke", "#f06332")
+				.style("stroke-width", 3);
+
+			// Add trend line
+			const trendLine = d3.line()
+				.x(d => x(d.year))
+				.y(d => y(d.value));
+
+
+			const trendData = [
+				{ year: data[0].year, value: data[0].value },
+				{ year: data[data.length - 1].year, value: data[data.length - 1].value }
+			];
+
+			bounds_line_chart.append("path")
+				.datum(trendData)
+				.attr("class", "trend-line")
+				.attr("d", trendLine)
+				.style("stroke-dasharray", ("6, 3"))
+				.style("stroke", "black")
+				.style("stroke-width", 1);
+
+			// Add labels
+			bounds_line_chart.append("text")
+				.attr("class", "label")
+				.attr("x", innerWidth / 2 + 200)
+				.attr("y", innerHeight / 2 + 18)
+				.style("text-anchor", "middle")
+				.style("font-size", "14px")
+				.attr("transform", "rotate(-8)")
+				.text("Prepandemic trend");
+		</script>
+	</body>
+
+</html>
