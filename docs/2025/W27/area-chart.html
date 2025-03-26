@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a area chart</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="area-chart.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+	<body>
+		<main>
+			<section class="header">
+				<a href="../../index.html" class="back">
+					<span>← Back</span>
+				</a>
+				<h1>Recreating a area chart</h1>
+				<span class="date">March 26, 2025</span>
+			</section>
+			<section class="introduction">
+				<p>
+					This week I recreated a area chart from <a href="https://multimedia.tijd.be/trump-tarieven/"
+						class="external" ;>De Tijd</a> on the trade deficit and import tariffs of the Donald Trump
+					administration. Olaf Verhaeghe, Raphael Cockx and Thomas Roelens participated in its creation.
+				</p>
+				<span>Warning: Data may be inaccurate compared to the source.</span>
+			</section>
+			<section class="visualization">
+				<h2>Recreation</h2>
+				<div id="container1" class="container">
+				</div>
+			</section>
+			</div>
+			<section class="conclusion">
+				<h3>Highlights</h3>
+				<p>
+					Another area for the challenge and the first recreation of a Belgian newspaper. Among the goals of
+					this challenge, was to explore more newspapers that create visualizations outside of the ones I
+					already knew.
+				</p>
+				<ul>
+					<li>
+						It was a fun recreation. It's the first time I have done an area chart of this style: inverted
+						or negative? I wouldn't know the right way to call it.
+					</li>
+					<li>
+						To replicate the data I did something new for the first time. I used the same database as the
+						previous area chart, which, by chance, gave a similar shape, the difference being the values. I
+						defined the minimum and maximum values and scaled the numbers. The result: A 439,534 was
+						transformed into 142.
+					</li>
+				</ul>
+			</section>
+		</main>
+		<script type="module">
+			// Access data
+			import { scaledData } from './area-chart.js';
+
+			// Add formatting
+			const parseDate = d3.timeParse("%m/%Y");
+
+			scaledData.forEach(d => {
+				d.year = parseDate(d.year);
+			});
+
+			// Create chart dimensions
+			const width = 1000;
+			const height = 600;
+			const margin = {
+				top: 16,
+				right: 60,
+				bottom: 24,
+				left: 16
+			}
+
+			const innerWidth = width - margin.left - margin.right;
+			const innerHeight = height - margin.top - margin.bottom;
+
+			// Draw canvas
+			const wrapper_area_chart = d3.select("#container1")
+				.append("svg")
+				.attr("viewBox", "0 0 1000 600")
+				.attr("preserveAspectRatio", "xMidYMid meet");
+
+			const bounds_area_chart = wrapper_area_chart.append("g")
+				.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+			// Create scales
+			const x = d3.scaleTime()
+				.domain([parseDate("1/2000"), parseDate("06/2025")])
+				.range([0, innerWidth])
+
+			const y = d3.scaleLinear()
+				.domain([0, d3.max(scaledData, d => d.value)])
+				.range([0, innerHeight]);
+
+			bounds_area_chart.append("g")
+				.attr("transform", `translate(0, ${innerHeight})`)
+				.attr("class", "axis-x")
+				.call(d3.axisBottom(x).ticks(d3.timeYear.every(4)));
+
+			bounds_area_chart.append("g")
+				.attr("transform", `translate(${innerWidth + margin.left}, 0)`)
+				.attr("class", "axis-y")
+				.call(d3.axisLeft(y).tickFormat(d => d === 0 ? "" : -d));
+
+			// Draw gridlines
+			const xAxisGrid = d3.axisBottom(x)
+				.tickSize(-innerHeight)
+				.tickFormat('')
+				.ticks(5);
+
+			const yAxisGrid = d3.axisLeft(y)
+				.tickSize(-innerWidth)
+				.tickFormat('')
+				.ticks(5);
+
+			const grid = bounds_area_chart.append('g')
+				.attr('class', 'grid');
+
+			grid.append('g')
+				.attr("transform", `translate(0, 0)`)
+				.call(yAxisGrid);
+
+			grid.append('g')
+				.attr("transform", `translate(0, ${innerHeight})`)
+				.call(d3.axisBottom(x)
+					.tickSize(-innerHeight)
+					.tickFormat('')
+					.ticks(d3.timeYear.every(4)));
+
+			// Draw data
+			const yearSplit = parseDate("1/2008");
+
+			const dataBeforeSplit = scaledData.filter(d => d.year <= yearSplit);
+			const dataAfterSplit = scaledData.filter(d => d.year >= yearSplit);
+
+			const areaBeforeSplit = d3.area()
+				.x(d => x(d.year) + 1)
+				.y0(0)
+				.y1(d => y(d.value));
+
+			const areaAfterSplit = d3.area()
+				.x(d => x(d.year))
+				.y0(0)
+				.y1(d => y(d.value));
+
+			bounds_area_chart.append("path")
+				.datum(dataBeforeSplit)
+				.attr("class", "area-before")
+				.attr("d", areaBeforeSplit)
+				.style("fill", "#4F4C4D");
+
+			bounds_area_chart.append("path")
+				.datum(dataAfterSplit)
+				.attr("class", "area-after")
+				.attr("d", areaAfterSplit)
+				.style("fill", "#D93B20");
+		</script>
+	</body>
+
+</html>
