@@ -48,7 +48,8 @@
 					<li>
 						It was very difficult to design the angles. I had to use <b>Math.cos, Math.sin, and Math.PI</b>
 						to
-						create them and I even had to write some random numbers to get the result I expected (You can find this in the code by searching for a <b>// ???</b>). Did it
+						create them and I even had to write some random numbers to get the result I expected (You can
+						find this in the code by searching for a <b>// ???</b>). Did it
 						work? Yes, but without further explanation.
 					</li>
 					<li>
@@ -73,13 +74,13 @@
 			const container = d3.select("#container1")
 
 			data.forEach((data, i) => {
-				const svg = container.append("svg")
+				const wrapper_radial_line = container.append("svg")
 					.attr("width", width)
 					.attr("height", height + 34)
 					.attr("viewBox", `0 0 ${width} ${height}`)
 					.attr("preserveAspectRatio", "xMidYMid meet");
 
-				const chartGroup = svg.append("g")
+				const bounds_radial_line = wrapper_radial_line.append("g")
 					.attr("transform", `translate(${width / 2}, ${height / 2 + 15})`);
 
 				// Create scales
@@ -95,7 +96,7 @@
 				const colors = ["#48596d", "#dd5751", "#378892", "#8a6097", "#6d8e62", "#ee8d57"];
 
 
-				const angularAxis = chartGroup.append("g")
+				const angularAxis = bounds_radial_line.append("g")
 					.attr("class", "axis");
 
 				// Draw peripherals
@@ -130,7 +131,7 @@
 
 				const titles = ["KOKAINA", "ECSTASY", "AMFETAMINA", "METAMFETAMINA", "KONOPIE", "KETAMINA"];
 
-				svg.append("text")
+				wrapper_radial_line.append("text")
 					.attr("x", width / 2)
 					.attr("y", 0)
 					.attr("text-anchor", "middle")
@@ -147,7 +148,7 @@
 					const innerRadius = 60;
 					const outerRadius = chartRadius;
 
-					chartGroup.append("path")
+					bounds_radial_line.append("path")
 						.attr("d", d3.arc()
 							.innerRadius(innerRadius)
 							.outerRadius(outerRadius)
@@ -158,7 +159,7 @@
 						.attr("opacity", 0.1);
 				}
 
-				const radialAxis = chartGroup.append("g")
+				const radialAxis = bounds_radial_line.append("g")
 					.attr("class", "axis");
 
 				radialAxis.selectAll("circle")
@@ -189,7 +190,7 @@
 					.outerRadius(d => radiusScale(d.value))
 					.curve(d3.curveCardinalClosed);
 
-				chartGroup.append("path")
+				bounds_radial_line.append("path")
 					.datum(data)
 					.attr("class", "area")
 					.attr("d", areaGenerator)
@@ -201,14 +202,14 @@
 					.radius(d => radiusScale(d.value))
 					.curve(d3.curveCardinalClosed);
 
-				chartGroup.append("path")
+				bounds_radial_line.append("path")
 					.datum(data)
 					.attr("class", "line")
 					.attr("d", lineGenerator)
 					.attr("fill", "none")
 					.attr("stroke", colors[i % colors.length]);
 
-				chartGroup.selectAll(".dot")
+				bounds_radial_line.selectAll(".dot")
 					.data(data)
 					.enter()
 					.append("circle")
