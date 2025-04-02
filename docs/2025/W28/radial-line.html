@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a radial line graph</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="radial-line.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+	<body>
+		<main>
+			<section class="header">
+				<a href="../../index.html" class="back">
+					<span>← Back</span>
+				</a>
+				<h1>Recreating a radial line graph</h1>
+				<span class="date">April 02, 2025</span>
+			</section>
+			<section class="introduction">
+				<p>
+					This week I recreated a radial line graph from <a
+						href="https://biqdata.wyborcza.pl/biqdata/7,159116,31781221,w-srode-amfa-w-weekend-koka-co-sie-bierze-w-krakowie-a-co.html"
+						class="external" ;>Gazeta Wyborcza</a> on drug use in European cities. Gaby Khazalová and Danuta
+					Pawłowska participated in its creation.
+				</p>
+				<span>Warning: Data may be inaccurate compared to the source.</span>
+			</section>
+			<section class="visualization">
+				<h2>Recreation</h2>
+				<div id="container1" class="container">
+				</div>
+			</section>
+			</div>
+			<section class="conclusion">
+				<h3>Highlights</h3>
+				<p>
+					The first radial line graph of the challenge and my first recreation of a Polish newspaper. It was a
+					complicated recreation, there was a lot of <b>"this is the first time I've done this"</b> and
+					<b>"this is new
+						to me"</b>. Although it was complicated, I'm very happy with the result.
+				</p>
+				<ul>
+					<li>
+						It was very difficult to design the angles. I had to use <b>Math.cos, Math.sin, and Math.PI</b>
+						to
+						create them and I even had to write some random numbers to get the result I expected (You can find this in the code by searching for a <b>// ???</b>). Did it
+						work? Yes, but without further explanation.
+					</li>
+					<li>
+						I had some weeks without recreating a visualization with so many details to create. I'm even
+						going to do some research on the use of opacity in overlapping elements and practice more with
+						the creation of dynamic angles.
+					</li>
+				</ul>
+			</section>
+		</main>
+		<script type="module">
+			// Access data
+			import { data } from './radial-line.js';
+
+			// Create chart dimensions
+			const width = 260;
+			const height = 260;
+			const margin = { top: 40, right: 30, bottom: 30, left: 30 };
+			const chartRadius = height / 2 - margin.top;
+
+			// Draw canvas
+			const container = d3.select("#container1")
+
+			data.forEach((data, i) => {
+				const svg = container.append("svg")
+					.attr("width", width)
+					.attr("height", height + 34)
+					.attr("viewBox", `0 0 ${width} ${height}`)
+					.attr("preserveAspectRatio", "xMidYMid meet");
+
+				const chartGroup = svg.append("g")
+					.attr("transform", `translate(${width / 2}, ${height / 2 + 15})`);
+
+				// Create scales
+				const angleScale = d3.scaleBand()
+					.domain(data.map(d => d.name))
+					.range([0, 2 * Math.PI])
+					.padding(0);
+
+				const radiusScale = d3.scaleLinear()
+					.domain([0, 150])
+					.range([0, chartRadius]);
+
+				const colors = ["#48596d", "#dd5751", "#378892", "#8a6097", "#6d8e62", "#ee8d57"];
+
+
+				const angularAxis = chartGroup.append("g")
+					.attr("class", "axis");
+
+				// Draw peripherals
+				angularAxis.selectAll("line")
+					.data(data)
+					.enter()
+					.append("line")
+					.attr("x1", 0)
+					.attr("y1", 0)
+					.attr("x2", d => Math.cos(angleScale(d.name) - Math.PI / 2) * (chartRadius + 12))
+					.attr("y2", d => Math.sin(angleScale(d.name) - Math.PI / 2) * (chartRadius + 12))
+					.attr("stroke", "#d8d8d8");
+
+				angularAxis.selectAll("text")
+					.data(data)
+					.enter()
+					.append("text")
+					.attr("x", d => Math.cos(angleScale(d.name) - Math.PI / 2) * (chartRadius + 18))
+					.attr("y", d => Math.sin(angleScale(d.name) - Math.PI / 2) * (chartRadius + 16))
+					.attr("text-anchor", "middle")
+					.attr("dy", d => {
+						const angle = angleScale(d.name);
+						return Math.sin(angle - Math.PI / 2) > 0 ? "0.3em" : "0";
+					})
+					.attr("dx", d => {
+						const angle = angleScale(d.name);
+						return Math.cos(angle - Math.PI / 2) > 0 ? "0" : "-0.45em";
+					})
+					.attr("font-size", "13px")
+					.attr("fill", "#666666")
+					.text(d => d.name);
+
+				const titles = ["KOKAINA", "ECSTASY", "AMFETAMINA", "METAMFETAMINA", "KONOPIE", "KETAMINA"];
+
+				svg.append("text")
+					.attr("x", width / 2)
+					.attr("y", 0)
+					.attr("text-anchor", "middle")
+					.attr("font-size", "18px")
+					.attr("font-weight", "bold")
+					.attr("fill", colors[i % colors.length])
+					.text(titles[i]);
+
+				const sobData = data.find(d => d.name === "Sob");
+				const nieData = data.find(d => d.name === "Nie");
+				if (sobData && nieData) {
+					const startAngle = angleScale("Sob") + 1.57; // ???
+					const endAngle = angleScale("Nie") + 2.47; // ???
+					const innerRadius = 60;
+					const outerRadius = chartRadius;
+
+					chartGroup.append("path")
+						.attr("d", d3.arc()
+							.innerRadius(innerRadius)
+							.outerRadius(outerRadius)
+							.startAngle(startAngle - Math.PI / 2)
+							.endAngle(endAngle - Math.PI / 2)
+						)
+						.attr("fill", "grey")
+						.attr("opacity", 0.1);
+				}
+
+				const radialAxis = chartGroup.append("g")
+					.attr("class", "axis");
+
+				radialAxis.selectAll("circle")
+					.data(radiusScale.ticks(3))
+					.enter()
+					.append("circle")
+					.attr("r", d => radiusScale(d))
+					.attr("fill", "none")
+					.attr("stroke", (d, i) => i === 2 ? "#232323" : "#d8d8d8")
+					.attr("stroke-width", (d, i) => i === 2 ? 1.4 : 1);
+
+				radialAxis.selectAll("text")
+					.data([50, 150])
+					.enter()
+					.append("text")
+					.attr("y", d => -radiusScale(d))
+					.attr("dy", "+0.6em")
+					.attr("x", 4)
+					.attr("text-anchor", "start")
+					.attr("font-size", "11px")
+					.attr("fill", "#666666")
+					.text(d => `${d}%`);
+
+				// Draw data
+				const areaGenerator = d3.areaRadial()
+					.angle(d => angleScale(d.name))
+					.innerRadius(0)
+					.outerRadius(d => radiusScale(d.value))
+					.curve(d3.curveCardinalClosed);
+
+				chartGroup.append("path")
+					.datum(data)
+					.attr("class", "area")
+					.attr("d", areaGenerator)
+					.attr("fill", colors[i % colors.length])
+					.attr("fill-opacity", "0.25");
+
+				const lineGenerator = d3.lineRadial()
+					.angle(d => angleScale(d.name))
+					.radius(d => radiusScale(d.value))
+					.curve(d3.curveCardinalClosed);
+
+				chartGroup.append("path")
+					.datum(data)
+					.attr("class", "line")
+					.attr("d", lineGenerator)
+					.attr("fill", "none")
+					.attr("stroke", colors[i % colors.length]);
+
+				chartGroup.selectAll(".dot")
+					.data(data)
+					.enter()
+					.append("circle")
+					.attr("class", "dot")
+					.attr("cx", d => Math.cos(angleScale(d.name) - Math.PI / 2) * radiusScale(d.value))
+					.attr("cy", d => Math.sin(angleScale(d.name) - Math.PI / 2) * radiusScale(d.value))
+					.attr("r", 3)
+					.attr("fill", colors[i % colors.length]);
+			});
+		</script>
+	</body>
+
+</html>
