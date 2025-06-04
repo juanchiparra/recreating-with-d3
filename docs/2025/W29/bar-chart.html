@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <title>Recreating a bar chart</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link href="bar-chart.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <main>
+        <section class="header">
+            <a href="../../index.html" class="back">
+                <span>← Back</span>
+            </a>
+            <h1>Recreating a bar chart</h1>
+            <span class="date">June 04, 2025</span>
+        </section>
+        <section class="introduction">
+            <p>
+                This week I recreated a bar chart from <a
+                    href="https://www.nexojornal.com.br/grafico/2025/05/06/eleicao-papa-conclave-quem-faz-parte-cardeais-2"
+                    class="external" ;>Nexo Jornal</a> on the most frequent names chosen by the popes.
+                Gabriel Zanlorenssi, Giovanna Hemerly and Marcelo Montanini participated in its creation.
+            </p>
+            <span>Warning: Data may be inaccurate compared to the source.</span>
+        </section>
+        <section class="visualization">
+            <h2>Recreation</h2>
+            <div id="legend" class="legend-container"
+                style="display: flex; gap: 1px; align-items: center; margin-bottom: 24px; width: 100%;;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div
+                        style="width: 250px; height: 24px; background: #ff4d56; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: #fff; font-size: 14px; font-weight: bold;">MENOS DE 200 ANOS</span>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div
+                        style="width: 250px; height: 24px; background: #ffce2e; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: #000; font-size: 14px; font-weight: bold;">MAIS DE 200 ANOS</span>
+                    </div>
+                </div>
+            </div>
+            <div id="container1" class="container">
+            </div>
+        </section>
+        </div>
+        <section class="conclusion">
+            <h3>Highlights</h3>
+            <p>
+                The first love of many: the bar chart. It's probably the type of chart I have been able to visualize the
+                most. I'm glad I could add new features for the first time.
+            </p>
+            <ul>
+                <li>I was able to create a pattern with SVG so I could make a part of the bar stand out. Adjusting the
+                    path is a challenge, I couldn't get it to look how I wanted, but I liked the result.
+                </li>
+                <li>I'm not sure if there is a correct way to do it, but I created two bar charts, one with the solid
+                    color and the other with the pattern, this one I put behind and smaller to avoid showing that they
+                    were overlapping. Could I have gotten the bar chart to start where the other one ended? Maybe, but I
+                    don't know, at the moment, if it's possible.
+                </li>
+            </ul>
+        </section>
+    </main>
+    <script type="module">
+        // Access data
+        import { data } from './bar-chart.js';
+
+        // Create chart dimensions
+        const width = 700;
+        const height = 550;
+        const margin = {
+            top: 20,
+            right: 10,
+            bottom: 60,
+            left: 120
+        }
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+
+        // Draw canvas
+        const wrapper_bar = d3.select("#container1")
+            .append("svg")
+            .attr("viewBox", "0 0 700 500")
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        const bounds_bar = wrapper_bar.append("g")
+            .style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+        // Create scales
+        const y = d3.scaleBand()
+            .domain(data.map(d => d.name))
+            .range([0, innerHeight]);
+
+        const x = d3.scaleLinear()
+            .domain([0, d3.max(data, d => Math.max(d.value, d.value2))])
+            .nice()
+            .range([0, innerWidth]);
+
+        const dataWidth = 18;
+        const dataHeight = 36;
+        const dataGap = 2.6;
+
+        // Draw data
+        data.forEach((d, i) => {
+            for (let j = 0; j < d.value; j++) {
+                bounds_bar.append("rect")
+                    .attr("class", "bar-background-unit")
+                    .attr("x", j * (dataWidth + dataGap))
+                    .attr("y", y(d.name) + (y.bandwidth() - dataHeight) / 2)
+                    .attr("width", dataWidth)
+                    .attr("height", dataHeight)
+                    .attr("fill", "#ff4d56");
+            }
+        });
+
+        data.forEach((d, i) => {
+            for (let j = d.value; j < d.value + d.value2; j++) {
+                bounds_bar.append("rect")
+                    .attr("class", "bar-unit")
+                    .attr("x", j * (dataWidth + dataGap))
+                    .attr("y", y(d.name) + (y.bandwidth() - dataHeight) / 2)
+                    .attr("width", dataWidth)
+                    .attr("height", dataHeight)
+                    .attr("fill", "#ffce2e");
+            }
+        });
+
+        // Draw labels
+        bounds_bar.selectAll(".bar-label")
+            .data(data)
+            .enter().append("text")
+            .attr("class", "bar-label")
+            .attr("x", d => (d.value + d.value2) * (dataWidth + dataGap) + 5)
+            .attr("y", d => y(d.name) + y.bandwidth() / 2 - 1.5)
+            .attr("dy", "0.35em")
+            .attr("text-anchor", "start")
+            .text((d, i) => i === 0 ? `${d.value + d.value2} papas` : `${d.value + d.value2}`)
+            .attr("fill", "#000")
+            .style("font-size", "17px")
+            .style("font-weight", "700");
+
+        bounds_bar.selectAll(".label")
+            .data(data)
+            .enter().append("text")
+            .attr("class", "label")
+            .attr("x", -10)
+            .attr("y", d => y(d.name) + y.bandwidth() / 2)
+            .attr("dy", "0.35em")
+            .attr("text-anchor", "end")
+            .text(d => d.name)
+            .attr("fill", "#000")
+            .style("font-size", "17px")
+            .style("font-weight", "700");
+
+        wrapper_bar.append("text")
+            .attr("y", height - 140)
+            .attr("text-anchor", "end")
+            .attr("fill", "#000")
+            .style("font-size", "16px")
+            .style("font-weight", "700")
+            .selectAll("tspan")
+            .data([
+                "Foram 266 papas, com 81 nomes",
+                "diferentes, na lista oficial do Vaticano"
+            ])
+            .enter()
+            .append("tspan")
+            .attr("x", width - 40)
+            .attr("dy", (d, i) => i === 0 ? 0 : "1.2em")
+            .text(d => d);
+
+        bounds_bar.append("line")
+            .attr("x1", 0)
+            .attr("x2", 0)
+            .attr("y1", 0)
+            .attr("y2", innerHeight)
+            .attr("stroke", "#222")
+            .attr("stroke-width", 2.5)
+            .attr("stroke-linecap", "round");
+    </script>
+</body>
+
+</html>
