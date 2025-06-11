@@ -36,6 +36,8 @@ It's a personal challenge to keep learning: https://juanchiparra.github.io/recre
 | W27 | [De Tijd](https://multimedia.tijd.be/trump-tarieven/) | [2025/W27](/docs/2025/W27/area-chart.html) | [Area chart](https://juanchiparra.github.io/recreating-with-d3/2025/W27/area-chart.html) |
 | W28 | [Gazeta Wyborcza](https://biqdata.wyborcza.pl/biqdata/7,159116,31781221,w-srode-amfa-w-weekend-koka-co-sie-bierze-w-krakowie-a-co.html) | [2025/W28](/docs/2025/W28/radial-line.html) | [Radial line graph](https://juanchiparra.github.io/recreating-with-d3/2025/W28/radial-line.html) |
 | W29 | [Nexo Jornal](https://www.nexojornal.com.br/grafico/2025/05/06/eleicao-papa-conclave-quem-faz-parte-cardeais-2) | [2025/W29](/docs/2025/W29/bar-chart.html) | [Bar chart](https://juanchiparra.github.io/recreating-with-d3/2025/W29/bar-chart.html) |
+| W30 | [McKinsey & Company](https://www.mckinsey.com/featured-insights/sustainable-inclusive-growth/charts/young-minds-heavy-mental-burdens) | [2025/W30](/docs/2025/W30/histogram.html) | [Histogram](https://juanchiparra.github.io/recreating-with-d3/2025/W30/histogram.html) |
+
 
 
 
