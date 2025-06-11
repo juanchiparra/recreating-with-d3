@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+	<title>Recreating a histogram chart</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="../../favicon.ico" type="image/x-icon">
+	<link href="histogram.css" rel="stylesheet">
+	<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+	<main>
+		<section class="header">
+			<a href="../../index.html" class="back">
+				<span>← Back</span>
+			</a>
+			<h1>Recreating a histogram</h1>
+			<span class="date">June 11, 2025</span>
+		</section>
+		<section class="introduction">
+			<p>
+				This week I recreated a histogram from <a
+					href="https://www.mckinsey.com/featured-insights/sustainable-inclusive-growth/charts/young-minds-heavy-mental-burdens"
+					class="external" ;>McKinsey & Company</a> on mental health illnesses and their impact on age groups.
+			</p>
+			<span>Warning: Data may be inaccurate compared to the source.</span>
+		</section>
+		<section class="visualization">
+			<h2>Recreation</h2>
+			<div id="container1"></div>
+		</section>
+		</div>
+		<section class="conclusion">
+			<h3>Highlights</h3>
+			<p>
+				This is the first histogram for the challenge, a simple one to say goodbye. There are now more than
+				<b>30 recreations</b>, and with this
+				last one, I consider the challenge finished. It has accompanied me for over eight months, involving
+				extensive research, recreating designs, and meeting amazing information designers and media. I'm very
+				pleased with the final result.
+			</p>
+			<h3>What's next?</h3>
+			<p>I'll continue to work on long-term projects, and I plan to return to <b>recreating-with-svelte</b>
+				sometime at
+				the end of the year.
+			</p>
+		</section>
+	</main>
+	<script type="module">
+		// Access data
+		import { data1, data2 } from './histogram.js';
+
+		// Create chart dimensions
+		const width = 450;
+		const height = 500;
+		const margin = { top: 90, right: 0, bottom: 80, left: 60 };
+
+		const innerWidth = width - margin.left - margin.right;
+		const innerHeight = height - margin.top - margin.bottom;
+
+
+		// Draw canvas
+		const wrapper_histogram = d3.select("#container1")
+			.append("svg")
+			.attr("viewBox", "0 0 900 500")
+			.attr("preserveAspectRatio", "xMidYMid meet");
+
+		wrapper_histogram.append("line")
+			.attr("x1", 458)
+			.attr("y1", 0)
+			.attr("x2", 458)
+			.attr("y2", 475)
+			.attr("stroke", "#ccc")
+			.attr("stroke-width", "1px");
+
+		const bounds_histogram = wrapper_histogram
+			.append("g")
+			.style("transform", `translate(${margin.left}px, ${margin.top}px)`);
+
+		const chart1 = bounds_histogram.append("g")
+			.attr("transform", `translate(0,0)`);
+
+		const chart2 = bounds_histogram.append("g")
+			.attr("transform", `translate(${innerWidth + margin.left},0)`);
+
+		// Create scales
+		const x0 = d3.scaleBand()
+			.domain(data1.map(d => d.category))
+			.range([0, innerWidth])
+			.paddingInner(0.025)
+			.paddingOuter(-0.48);
+
+		const x1 = d3.scaleBand()
+			.domain(data2.map(d => d.category))
+			.range([0, innerWidth])
+			.paddingInner(0.025)
+			.paddingOuter(-0.48);
+
+		const y0 = d3.scaleLinear()
+			.domain([0, 20])
+			.range([innerHeight, 0]);
+
+		const y1 = d3.scaleLinear()
+			.domain([0, 20])
+			.range([innerHeight, 0]);
+
+		// Draw data
+		chart1.append("g")
+			.selectAll("rect")
+			.data(data1)
+			.enter()
+			.append("rect")
+			.attr("class", "bar")
+			.attr("x", d => x0(d.category))
+			.attr("y", d => y0(d.value))
+			.attr("width", x0.bandwidth())
+			.attr("height", d => y0(0) - y0(d.value))
+			.attr("fill", d => d.type === "light" ? "#00a9f4" : "#061f79");
+
+		chart1.append("g")
+			.selectAll("text")
+			.data(data1.filter(d => d.value > 0))
+			.enter()
+			.append("text")
+			.attr("x", d => x0(d.category) + x0.bandwidth() / 2)
+			.attr("y", d => y0(d.value) + 20)
+			.attr("text-anchor", "middle")
+			.attr("fill", d => d.type === "light" ? "black" : "white")
+			.style("font-size", "14px")
+			.text(d => d.value);
+
+		chart2.append("g")
+			.selectAll("rect")
+			.data(data2)
+			.enter()
+			.append("rect")
+			.attr("class", "bar")
+			.attr("x", d => x1(d.category))
+			.attr("y", d => y1(d.value))
+			.attr("width", x1.bandwidth())
+			.attr("height", d => y1(0) - y1(d.value))
+			.attr("fill", d => d.type === "light" ? "#00a9f4" : "#061f79");
+
+		chart2.append("g")
+			.selectAll("text")
+			.data(data2.filter(d => d.value > 0))
+			.enter()
+			.append("text")
+			.attr("x", d => x1(d.category) + x1.bandwidth() / 2)
+			.attr("y", d => y0(d.value) + 20)
+			.attr("text-anchor", "middle")
+			.attr("fill", d => d.type === "light" ? "black" : "white")
+			.style("font-size", "14px")
+			.text(d => d.value);
+
+
+		chart1.append("g")
+			.attr("class", "x-axis")
+			.attr("transform", `translate(-20,${innerHeight})`)
+			.call(d3.axisBottom(x0)
+				.tickFormat((d, i, nodes) => {
+					if (i === 0 || i === nodes.length - 1) return "";
+					return d;
+				})
+			)
+			.selectAll("text")
+			.attr("fill", "#9e9e9e");
+
+
+		// Draw labels
+		chart1.append("text")
+			.attr("x", innerWidth / 2)
+			.attr("y", innerHeight + 50)
+			.attr("text-anchor", "middle")
+			.attr("fill", "#9e9e9e")
+			.style("font-size", "15px")
+			.text("Age");
+
+		chart2.append("g")
+			.attr("class", "x-axis")
+			.attr("transform", `translate(-20,${innerHeight})`)
+			.call(d3.axisBottom(x1)
+				.tickFormat((d, i, nodes) => {
+					if (i === 0 || i === nodes.length - 1) return "";
+					return d;
+				})
+			)
+			.selectAll("text")
+			.attr("fill", "#9e9e9e");
+
+		chart2.append("text")
+			.attr("x", innerWidth / 2)
+			.attr("y", innerHeight + 50)
+			.attr("text-anchor", "middle")
+			.attr("fill", "#9e9e9e")
+			.style("font-size", "15px")
+			.text("Age");
+
+		chart1.append("text")
+			.attr("x", -margin.left + 30)
+			.attr("y", -70)
+			.attr("text-anchor", "start")
+			.attr("fill", "#222")
+			.style("font-size", "16px")
+			.style("font-weight", "bold")
+			.text("Primary disease burden of mental health");
+
+		chart1.append("text")
+			.attr("x", -margin.left + 30)
+			.attr("y", -50)
+			.attr("text-anchor", "start")
+			.attr("fill", "#222")
+			.style("font-size", "15px")
+			.html('<tspan style="font-weight:bold">conditions</tspan>, % of disability-adjusted life');
+
+		chart1.append("text")
+			.attr("x", -margin.left + 30)
+			.attr("y", -30)
+			.attr("text-anchor", "start")
+			.attr("fill", "#222")
+			.style("font-size", "15px")
+			.text("years (DALYs) as of 2025");
+
+		chart2.append("text")
+			.attr("x", -margin.left + 30)
+			.attr("y", -70)
+			.attr("text-anchor", "start")
+			.attr("fill", "#222")
+			.style("font-size", "16px")
+			.style("font-weight", "bold")
+			.text("Primary disease burder of non-mental-");
+
+		chart2.append("text")
+			.attr("x", -margin.left + 30)
+			.attr("y", -50)
+			.attr("text-anchor", "start")
+			.attr("fill", "#222")
+			.style("font-size", "16px")
+			.style("font-weight", "bold")
+			.text("health noncommunicable diseases,");
+
+		chart2.append("text")
+			.attr("x", -margin.left + 30)
+			.attr("y", -30)
+			.attr("text-anchor", "start")
+			.attr("fill", "#222")
+			.style("font-size", "15px")
+			.text("% of DALYs as of 2025");
+	</script>
+</body>
+
+</html>
