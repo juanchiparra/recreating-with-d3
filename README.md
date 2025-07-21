@@ -1,9 +1,10 @@
 # Recreating with D3
 
-Each week I'll be recreating a data visualization that has caught my attention from a media outlet. Regardless of the way it was visualized or the tools that were used, I'll try to recreate it using D3.js.
+Over 30 weeks, I recreated a data visualization, one for each week, that caught my attention from a media outlet. Regardless of how it was visualized or what tools were used, I recreated them using D3.js.
 
-It's a personal challenge to keep learning: https://juanchiparra.github.io/recreating-with-d3/
+It was a personal challenge to keep learning: https://juanchiparra.github.io/recreating-with-d3/.
 
+It took place from October 2024 to June 2025.
 
 | Week | Source | Code | Visualization |
 | :---: | :--- | :--- | :--- |
